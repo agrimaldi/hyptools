@@ -1,0 +1,20 @@
+application: hyptools
+version: 2
+runtime: python
+api_version: 1
+
+handlers:
+- url: /
+  script: index.py
+
+- url: /index\.html
+  script: index.py
+
+- url: /(battle_reports|present_fleets)/?
+  script: \1/index.py
+
+- url: /(battle_reports|present_fleets)/(result)
+  script: \1/index.py
+
+- url: /.*
+  script: notfound.py
