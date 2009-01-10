@@ -32,7 +32,7 @@ application = webapp.WSGIApplication([('/battle_reports', MainPage),
                                       ('/battle_reports/result', BattleReport),
                                       ('/battle_reports/result/', BattleReport)
                                       ],
-                                     debug=True)
+                                     debug=False)
 
 def main():
     run_wsgi_app(application)
