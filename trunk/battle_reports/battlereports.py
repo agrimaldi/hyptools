@@ -1,10 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import sys, os
 import string
 import re
-import sys
-import os
 
 
 PRICE = {
