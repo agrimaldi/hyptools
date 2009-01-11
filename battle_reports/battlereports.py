@@ -35,7 +35,6 @@ REGX = re.compile(
     r"^(?P<date>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$)"
     r"\s+"
     r"^Planet\s(?P<name>\b[-\w]+\b)$",
-#    r'[\s.]+*',
     re.M)
 TECH_RGX = re.compile(
     r"([\d]+)%.*"
