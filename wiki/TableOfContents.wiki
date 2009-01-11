@@ -1,1 +1,1 @@
-  * [ChangeLogs Change log]
+* [ChangeLogs Change log]
