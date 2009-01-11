@@ -5,7 +5,6 @@ import sys, os
 import string
 import re
 
-
 PRICE = {
     "Cruisers"      : 48000,
     "Destroyers"    : 8000,
