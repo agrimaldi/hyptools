@@ -41,8 +41,6 @@ TECH_RGX = re.compile(
     r".*?"
     r"([\d.]+)",
     re.M)
-BOMB_RGX = re.compile(
-    r"()")
 
 
 class Analysis(dict):
@@ -50,15 +48,14 @@ class Analysis(dict):
     Wrapper for the BattleReport class.
     This class is used to analyse several battle reports in a row.
     Battle reports are stored as a dictionary whose keys are the name of the
-    planet, and the values are BattleReport objects.
+    planet, and values are the forum friendly reports.
     """
     def __init__(self, raw_data=None):
         self.__parse(raw_data.replace('\r', ''))
 
     def __parse(self, input_str):
         """
-        Parse the data and returns a dictionary
-            dict[BattleReport.name] = BattleReport.nice_report
+        Parse the data and populates the self dictionary.
         """
         start_indexes = [m.start() for m in DATE_RGX.finditer(input_str)]
         end_indexes = [i-5 for i in start_indexes[1:]] + [None]
@@ -75,37 +72,31 @@ class BattleReport:
     """
     Battle Report class.
     Contains information about a single battle report on a single planet.
-    Use the wrapper Analysis to analyse several battle reports in a raw.
-        - raw_battle_report = input string, supposed to be a battle report
-        - atk = dictionary containing information about the attacker's fleets
-        - def = dictionary containing information about the defender's fleets
-        - date = date and hour the battle tick happened
-        - name = name of the planet the battle tick happened on
     """
     def __init__(self, raw_battle_report=None):
         self.raw_battle_report = raw_battle_report
+        self.date = ""
+        self.name = ""
         self.atk_units = {}
         self.def_units = {}
         self.atk_techs = {
             "armies":   {
-                "bonus":    '0',
-                "level":    "N/A"
+                "bonus": '0',
+                "level": "N/A"
             },
             "fleets":   {
-                "bonus":    '0',
-                "level":    "N/A"}
+                "bonus": '0',
+                "level": "N/A"}
         }
         self.def_techs = {
             "armies":   {
-                "bonus":    '0',
-                "level":    "N/A"
+                "bonus": '0',
+                "level": "N/A"
             },
             "fleets":   {
-                "bonus":    '0',
-                "level":    "N/A"}
+                "bonus": '0',
+                "level": "N/A"}
         }
-        self.date = ""
-        self.name = ""
         self.__parse()
         self.nice_report = self.__reformat()
 
@@ -205,8 +196,8 @@ Battle report for planet <b>$name</b>
                 atkLostPow += self.__round2int(amount['lost']) * POWER[unit]
                 atkLostPri += self.__round2int(amount['lost']) * PRICE[unit]
 
-        report += """TL GAs :    <b>$atk_ga_lvl</b>\t(+$atk_ga_bonus%)
-TL Ships :  <b>$atk_fleet_lvl</b>\t(+$atk_fleet_bonus%)
+        report += """TL GAs :    <b>$atk_ga_lvl</b>  (+$atk_ga_bonus%)
+TL Ships :  <b>$atk_fleet_lvl</b>  (+$atk_fleet_bonus%)
 
 <b>Defending :</b>
                     Initial         Lost
@@ -221,8 +212,8 @@ TL Ships :  <b>$atk_fleet_lvl</b>\t(+$atk_fleet_bonus%)
                 defLostPow += self.__round2int(amount['lost']) * POWER[unit]
                 defLostPri += self.__round2int(amount['lost']) * PRICE[unit]
 
-        report += """TL GAs :    <b>$def_ga_lvl</b>\t(+$def_ga_bonus%)
-TL Ships :  <b>$def_fleet_lvl</b>\t(+$def_fleet_bonus%)
+        report += """TL GAs :    <b>$def_ga_lvl</b>  (+$def_ga_bonus%)
+TL Ships :  <b>$def_fleet_lvl</b>  (+$def_fleet_bonus%)
 </pre>--------------------------------
 <b>Summary :</b>
 <pre>
@@ -236,7 +227,8 @@ Losses of       <b>$atk_perc%</b>
 Lost cash :     $def_lost_cash
 Initial AvP :   $def_init_power
 Lost AvP :      $def_lost_power
-Losses of       <b>$def_perc%</b></pre>"""
+Losses of       <b>$def_perc%</b></pre>
+"""
         brTemplate = string.Template(report)
         nice_battle_report = brTemplate.substitute({
             "name":             self.name,
@@ -265,66 +257,7 @@ Losses of       <b>$def_perc%</b></pre>"""
 
 
 def main():
-    s="""2009-01-12 06:30:44
-Planet Kadena
-
-
-Own forces
-
-Defending
-
-Attacking
-	Initial	Lost	Initial	Lost	Initial	Lost
-Cruisers 	3952 	0 	0 	0 	3952 	0
-Destroyers 	3881 	0 	0 	0 	3881 	0
-Bombers 	2478 	0 	0 	0 	2478 	0
-Scouts 	207041 	0 	0 	0 	207041 	0
-Ground Armies 	383 	3 	11 	11 	383 	3
-Techno bonus 15% for attacking armies (3>2).
-Defenders fought with the energy of despair.
-
-
-
-2009-01-12 04:31:05
-Planet Kadena
-
-
-Own forces
-
-Defending
-
-Attacking
-	Initial	Lost	Initial	Lost	Initial	Lost
-Cruisers 	3952 	0 	0 	0 	3952 	0
-Destroyers 	3881 	0 	0 	0 	3881 	0
-Bombers 	2478 	0 	0 	0 	2478 	0
-Scouts 	207041 	0 	0 	0 	207041 	0
-Ground Armies 	400 	17 	60 	49 	400 	17
-Techno bonus 15% for attacking armies (3>2).
-Defenders fought with the energy of despair.
-
-
-
-2009-01-12 04:31:05
-Planet Leep
-
-
-Own forces
-
-Defending
-
-Attacking
-	Initial	Lost	Initial	Lost	Initial	Lost
-Cruisers 	0 	0 	0 	0 	18942 	39
-Destroyers 	0 	0 	0 	0 	11756 	303
-Bombers 	1400 	1400 	1400 	1400 	12100 	0
-Scouts 	0 	0 	0 	0 	34152 	0
-Carried Armies 	0 	0 	0 	0 	? 	6
-Ground Armies 	490 	162 	490 	162 	0 	0
-Techno bonus 30% for attacking fleets (21.09>0)."""
-
-    a=Analysis(s)
-    print a.items()
+   pass
 
 if __name__ == '__main__':
     try:
