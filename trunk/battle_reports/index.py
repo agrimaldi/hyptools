@@ -1,10 +1,9 @@
 #!/usr/bin python
 # -*- coding:utf-8
 
-import cgi
-import os
-from google.appengine.ext.webapp import template
+import os, cgi
 from google.appengine.ext import webapp
+from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 from battle_reports.battlereports import Analysis
 
@@ -16,12 +15,13 @@ class MainPage(webapp.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 
-class BattleReport(webapp.RequestHandler):
+class SubmitReport(webapp.RequestHandler):
     def post(self):
         raw_report = cgi.escape(self.request.get('content'))
-        nice_report = Analysis(raw_report).getNiceReports()
+        nice_reports = Analysis(raw_report)
         template_values = {
-            'nice_report': nice_report,
+            "planet_names"  :   nice_reports.keys(),
+            "nice_reports"  :   nice_reports.values()
         }
         path = os.path.join(os.path.dirname(__file__), 'result.html')
         self.response.out.write(template.render(path, template_values))
@@ -29,8 +29,8 @@ class BattleReport(webapp.RequestHandler):
 
 application = webapp.WSGIApplication([('/battle_reports', MainPage),
                                       ('/battle_reports/', MainPage),
-                                      ('/battle_reports/result', BattleReport),
-                                      ('/battle_reports/result/', BattleReport)
+                                      ('/battle_reports/result', SubmitReport),
+                                      ('/battle_reports/result/', SubmitReport)
                                       ],
                                      debug=True)
 

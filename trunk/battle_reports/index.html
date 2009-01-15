@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html
-    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
@@ -8,16 +8,17 @@
 </head>
 <body>
     <h2> .:: Battle reports analyser ::. </h2>
-    <div>
-        <p>
-            Copy one or more battle reports in the following field.<br />
-            Press [Analyse] to process your data and analyse your battle
-            report(s).
-        </p>
-    </div>
     <form action="/battle_reports/result" method="post">
         <div>
-            <textarea name="content" rows="25" cols="50"></textarea>
+            <label for="content">
+                Copy one or more battle reports in the following field.<br />
+                You can copy/past the whole reports page from hyperiums.<br />
+                Press [Analyse] to process your data and analyse your battle
+                report(s).
+            </label>
+            <br />
+            <textarea name="content" id="content" rows="25" cols="50"></textarea>
+            <br />
         </div>
         <div>
             <input type="submit" value="Analyse"/>
