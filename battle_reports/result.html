@@ -8,16 +8,28 @@
 </head>
 <body>
     <h2> .:: Processed report(s) ::. </h2>
-    <div>
-        <p>
-            Use Ctrl-A / Ctrl-C to select all and copy the forum-friendly
-            report.<br />
-        </p>
-    </div>
-    <div>
-        <textarea readonly="readonly" name="content" rows="30" cols="60">
-            {{ nice_report }}
-        </textarea>
-    </div>
+<!--    <form method="post">-->
+        <div>
+            <label for="content">
+                Use Ctrl-A / Ctrl-C to select all and copy the forum-friendly
+                report.
+            </label><br />
+            <textarea readonly="readonly" name="content" id="content" rows="30" cols="60">
+                {% for planet_report in nice_reports %}
+                    {% for report in planet_report %}
+                        {{ report }}
+                    {% endfor %}
+                {% endfor %}
+            </textarea><br />
+        </div>
+        <div>
+            <label for="planet">Select a planet :</label><br />
+                <select name="planet" id="planet">
+                    {% for planet in planet_names %}
+                        <option value="{{ planet }}">{{ planet }}</option>
+                    {% endfor %}
+                </select>
+        </div>
+<!--    </form>-->
 </body>
 </html>
