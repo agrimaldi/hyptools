@@ -20,8 +20,8 @@ class SubmitReport(webapp.RequestHandler):
         raw_report = cgi.escape(self.request.get('content'))
         nice_reports = Analysis(raw_report)
         template_values = {
-            "planet_names"  :   nice_reports.keys(),
-            "nice_reports"  :   nice_reports.values()
+            "planet_names":            nice_reports.keys(),
+            "battle_report_objects":   nice_reports.values()
         }
         path = os.path.join(os.path.dirname(__file__), 'result.html')
         self.response.out.write(template.render(path, template_values))
