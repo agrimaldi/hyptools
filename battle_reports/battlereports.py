@@ -63,48 +63,39 @@ class Analysis(dict):
                         for start, end in zip(start_indexes, end_indexes)]
         for bt in list_report:
             if bt.name not in self:
-                self[bt.name] = [bt.nice_report]
+                self[bt.name] = [bt]
             else:
-                self[bt.name].append(bt.nice_report)
+                self[bt.name].append(bt)
 
 
 class BattleReport:
-    """
-    Battle Report class.
-    Contains information about a single battle report on a single planet.
-    """
     def __init__(self, raw_battle_report=None):
-        self.raw_battle_report = raw_battle_report
-        self.date = ""
-        self.name = ""
-        self.atk_units = {}
-        self.def_units = {}
-        self.atk_techs = {
-            "armies":   {
-                "bonus": '0',
-                "level": "N/A"
-            },
-            "fleets":   {
-                "bonus": '0',
-                "level": "N/A"}
-        }
-        self.def_techs = {
-            "armies":   {
-                "bonus": '0',
-                "level": "N/A"
-            },
-            "fleets":   {
-                "bonus": '0',
-                "level": "N/A"}
-        }
-        self.__parse()
-        self.nice_report = self.__reformat()
+        self.name = ''
+        self.date = ''
+        self.atk_ga_lvl = ''
+        self.atk_ga_bonus = ''
+        self.atk_fleet_lvl = ''
+        self.atk_fleet_bonus = ''
+        self.atk_lost_cash = ''
+        self.atk_init_power = ''
+        self.atk_lost_power = ''
+        self.atk_perc = 0
+        self.atk_report = ''
+        self.def_ga_lvl = ''
+        self.def_ga_bonus = ''
+        self.def_fleet_lvl = ''
+        self.def_fleet_bonus = ''
+        self.def_lost_cash = ''
+        self.def_init_power = ''
+        self.def_lost_power = ''
+        self.def_perc = 0
+        self.def_report = ''
+        if raw_battle_report is not None:
+            self.__parse(raw_battle_report)
 
     def __int2round(self, num):
         """
-        This method converts an integer to a rounded string :
-        3800000 --> 3.8M
-            __int2round(3800000) returns "3.8M"
+        This method converts an integer to a rounded string.
         """
         if num < 1000:
             return str(num)
@@ -117,143 +108,111 @@ class BattleReport:
 
     def __round2int(self, rnum):
         """
-        Converts strings such as "3.8M" to the corresponding integer value :
-        3.8M --> 3800000
-            round2int("3.8M") returns 3800000
+        Converts strings such as "3.8M" to the corresponding integer value
         """
         if rnum.endswith('M', -1):
             return int(float(rnum[:-1]) * 1000000)
         else:
             return int(rnum)
 
-    def __parse(self):
-        """
-        Single battle report parsing method.
-        The method populates the dictionnaries self.atk_units and self.def_units
-        with the number and type of ships initially owned and lost during the
-        battle tick by both sides.
-        """
-        try:
-            match = REGX.search(self.raw_battle_report)
-            self.date = match.group("date")
-            self.name = match.group("name")
-            fleets = FLEET_RGX.findall(self.raw_battle_report)
-            techs = TECH_RGX.findall(self.raw_battle_report)
-        except:
-            sys.exit("\n\nFailed to parse battle report\n\n")
-        else:
-            for techdata in techs:
-                sup = {
-                    "bonus": techdata[0],
-                    "level": techdata[3]
-                }
-                inf = {
-                    "bonus": '0',
-                    "level": techdata[4]
-                }
-                if techdata[1] == "defending":
-                    self.def_techs[techdata[2]] = sup
-                    self.atk_techs[techdata[2]] = inf
-                elif techdata[1] == "attacking":
-                    self.atk_techs[techdata[2]] = sup
-                    self.def_techs[techdata[2]] = inf
-            for ship in fleets:
-                self.def_units[ship[0]] = {
-                    "init": ship[3],
-                    "lost": ship[4]
-                }
-                self.atk_units[ship[0]] = {
-                    "init": ship[5],
-                    "lost": ship[6]
-                }
-
-    def __reformat(self):
-        """
-        This method does all necessary computations and returns a reformated
-        battle report.
-        """
+    def __parse(self, data):
         atkInitPow = 0
         atkLostPow = 0
         atkLostPri = 0
         defInitPow = 0
         defLostPow = 0
         defLostPri = 0
-
-        report = """
-Battle report for planet <b>$name</b>
-<b>$date</b>
-<pre>
-<b>Attacking :</b>
-                    Initial         Lost
-"""
-        for unit, amount in self.atk_units.iteritems():
-            report = ''.join([report,
-                              unit,
-                              amount['init'].rjust(27-len(unit)),
-                              amount['lost'].rjust(13), '\n'])
+        atk_techs = {
+            'armies':   {
+                'bonus': '0',
+                'level': 'N/A'
+            },
+            "fleets":   {
+                'bonus': '0',
+                'level': 'N/A'}
+        }
+        def_techs = {
+            'armies':   {
+                'bonus': '0',
+                'level': 'N/A'
+            },
+            'fleets':   {
+                'bonus': '0',
+                'level': 'N/A'}
+        }
+        atk_units = {}
+        def_units = {}
+        match = REGX.search(data)
+        fleets = FLEET_RGX.findall(data)
+        techs = TECH_RGX.findall(data)
+        for techdata in techs:
+            if techdata[1] == "defending":
+                def_techs[techdata[2]] = {
+                    'bonus': techdata[0],
+                    'level': techdata[3]
+                }
+                atk_techs[techdata[2]] = {
+                    'bonus': '0',
+                    'level': techdata[4]
+                }
+            elif techdata[1] == "attacking":
+                atk_techs[techdata[2]] = {
+                    'bonus': techdata[0],
+                    'level': techdata[3]
+                }
+                def_techs[techdata[2]] = {
+                    'bonus': '0',
+                    'level': techdata[4]
+                }
+        for ship in fleets:
+            def_units[ship[0]] = {
+                'init': ship[3],
+                'lost': ship[4]
+            }
+            atk_units[ship[0]] = {
+                'init': ship[5],
+                'lost': ship[6]
+            }
+        for unit, amount in atk_units.iteritems():
+            self.atk_report = ''.join([
+                self.atk_report,
+                unit,
+                amount['init'].rjust(27-len(unit)),
+                amount['lost'].rjust(13), '\n'])
             if unit != "Ground Armies" and unit != "Carried Armies":
                 atkInitPow += self.__round2int(amount['init']) * POWER[unit]
                 atkLostPow += self.__round2int(amount['lost']) * POWER[unit]
                 atkLostPri += self.__round2int(amount['lost']) * PRICE[unit]
-
-        report += """TL GAs :    <b>$atk_ga_lvl</b>  (+$atk_ga_bonus%)
-TL Ships :  <b>$atk_fleet_lvl</b>  (+$atk_fleet_bonus%)
-
-<b>Defending :</b>
-                    Initial         Lost
-"""
-        for unit, amount in self.def_units.iteritems():
-            report = ''.join([report,
-                              unit,
-                              amount['init'].rjust(27-len(unit)),
-                              amount['lost'].rjust(13), '\n'])
+        for unit, amount in def_units.iteritems():
+            self.def_report = ''.join([
+                self.def_report,
+                unit,
+                amount['init'].rjust(27-len(unit)),
+                amount['lost'].rjust(13), '\n'])
             if unit != "Ground Armies" and unit != "Carried Armies":
                 defInitPow += self.__round2int(amount['init']) * POWER[unit]
                 defLostPow += self.__round2int(amount['lost']) * POWER[unit]
                 defLostPri += self.__round2int(amount['lost']) * PRICE[unit]
-
-        report += """TL GAs :    <b>$def_ga_lvl</b>  (+$def_ga_bonus%)
-TL Ships :  <b>$def_fleet_lvl</b>  (+$def_fleet_bonus%)
-</pre>--------------------------------
-<b>Summary :</b>
-<pre>
-<b>Attacking :</b>
-Lost cash :     $atk_lost_cash
-Initial AvP :   $atk_init_power
-Lost AvP :      $atk_lost_power
-Losses of       <b>$atk_perc%</b>
-
-<b>Defending :</b>
-Lost cash :     $def_lost_cash
-Initial AvP :   $def_init_power
-Lost AvP :      $def_lost_power
-Losses of       <b>$def_perc%</b></pre>
-"""
-        brTemplate = string.Template(report)
-        nice_battle_report = brTemplate.substitute({
-            "name":             self.name,
-            "date":             self.date,
-            "atk_ga_lvl":       self.atk_techs["armies"]["level"],
-            "atk_ga_bonus":     self.atk_techs["armies"]["bonus"],
-            "atk_fleet_lvl":    self.atk_techs["fleets"]["level"],
-            "atk_fleet_bonus":  self.atk_techs["fleets"]["bonus"],
-            "atk_lost_cash":    self.__int2round(atkLostPri),
-            "atk_init_power":   self.__int2round(atkInitPow),
-            "atk_lost_power":   self.__int2round(atkLostPow),
-            "atk_perc":         (
-                atkInitPow and [int(100.0*atkLostPow / atkInitPow)] or [0])[0],
-            "def_ga_lvl":       self.def_techs["armies"]["level"],
-            "def_ga_bonus":     self.def_techs["armies"]["bonus"],
-            "def_fleet_lvl":    self.def_techs["fleets"]["level"],
-            "def_fleet_bonus":  self.def_techs["fleets"]["bonus"],
-            "def_lost_cash":    self.__int2round(defLostPri),
-            "def_init_power":   self.__int2round(defInitPow),
-            "def_lost_power":   self.__int2round(defLostPow),
-            "def_perc":         (
-                defInitPow and [int(100.0*defLostPow / defInitPow)] or [0])[0]
-        })
-
-        return nice_battle_report.strip()
+        self.date = match.group('date')
+        self.name = match.group('name')
+        self.atk_ga_lvl = atk_techs["armies"]["level"]
+        self.atk_ga_bonus = atk_techs["armies"]["bonus"]
+        self.atk_fleet_lvl = atk_techs["fleets"]["level"]
+        self.atk_fleet_bonus = atk_techs["fleets"]["bonus"]
+        self.atk_lost_cash = self.__int2round(atkLostPri)
+        self.atk_init_power = self.__int2round(atkInitPow)
+        self.atk_lost_power = self.__int2round(atkLostPow)
+        self.atk_perc = (
+            atkInitPow and [int(100.0*atkLostPow/atkInitPow)] or [0])[0]
+        self.def_ga_lvl = def_techs["armies"]["level"]
+        self.def_ga_bonus = def_techs["armies"]["bonus"]
+        self.def_fleet_lvl = def_techs["fleets"]["level"]
+        self.def_fleet_bonus = def_techs["fleets"]["bonus"]
+        self.def_lost_cash = self.__int2round(defLostPri)
+        self.def_init_power = self.__int2round(defInitPow)
+        self.def_lost_power = self.__int2round(defLostPow)
+        self.def_perc = (
+            defInitPow and [int(100.0*defLostPow/defInitPow)] or [0])[0]
 
 
 def main():
