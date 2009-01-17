@@ -10,11 +10,11 @@
     <h2> .:: Processed report(s) ::. </h2>
 <!--    <form method="post">-->
         <div>
-            <label for="content">
+            <label for="output">
                 Use Ctrl-A / Ctrl-C to select all and copy the forum-friendly
                 report.
             </label><br />
-            <textarea readonly="readonly" name="content" id="content" rows="30" cols="60">
+            <textarea readonly="readonly" name="output" id="output" rows="30" cols="60">
 {% for planet_report in battle_report_objects %}{% for r in planet_report %}
 Battle report for planet <b>{{ r.name }}</b>
 <b>{{ r.date }} </b>
