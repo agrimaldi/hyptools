@@ -44,7 +44,9 @@ Losses of       <b>{{ r.atk_perc }}%</b>
 Lost cash :     {{ r.def_lost_cash }}
 Initial AvP :   {{ r.def_init_power }}
 Lost AvP :      {{ r.def_lost_power }}
-Losses of       <b>{{ r.def_perc }}%</b></pre>
+Losses of       <b>{{ r.def_perc }}%</b>
+{% for bombdata in r.bombing_data %}
+{{ bombdata }}{% endfor %}</pre>
 {% endfor %}{% endfor %}
             </textarea><br />
         </div>
