@@ -41,7 +41,7 @@ BOMB_RGX = re.compile(r'(Population killed: \d+\w? / \d+)\.\s+|'
                       r'(Factories \w+: \d+)\.\s+|'
                       r'(Exploitations \w+: \d+)\.\s+|'
                       r'(Civ\. level damage: [,\d]+)',
-                      re.M | re.S)
+                      re.M)
 
 
 class Analysis(dict):
