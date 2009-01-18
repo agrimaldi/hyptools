@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title> .:: Battle reports analyser ::. </title>
+</head>
+<body>
+    <h2> .:: Processed report(s) ::. </h2>
+<!--    <form method="post">-->
+        <div>
+            <label for="output">
+                Use Ctrl-A / Ctrl-C to select all and copy the forum-friendly
+                report.
+            </label><br />
+            <textarea readonly="readonly" name="output" id="output" rows="30" cols="60">
+{% for planet_report in battle_report_objects %}{% for r in planet_report %}
+Battle report for planet <b>{{ r.name }}</b>
+<b>{{ r.date }} </b>
+<pre>
+<b>Attacking :</b>
+                    Initial         Lost
+{{ r.atk_report }}
+TL GAs :    <b>{{ r.atk_ga_lvl }}</b>  (+{{ r.atk_ga_bonus }}%)
+TL Ships :  <b>{{ r.atk_fleet_lvl }}</b>  (+{{ r.atk_fleet_bonus }}%)
+
+
+<b>Defending :</b>
+                    Initial         Lost
+{{ r.def_report }}
+TL GAs :    <b>{{ r.def_ga_lvl }}</b>  (+{{ r.def_ga_bonus }}%)
+TL Ships :  <b>{{ r.def_fleet_lvl }}</b>  (+{{ r.def_fleet_bonus }}%)
+</pre>--------------------------------
+<b>Summary :</b>
+<pre>
+<b>Attacking :</b>
+Lost cash :     {{ r.atk_lost_cash }}
+Initial AvP :   {{ r.atk_init_power }}
+Lost AvP :      {{ r.atk_lost_power }}
+Losses of       <b>{{ r.atk_perc }}%</b>
+
+<b>Defending :</b>
+Lost cash :     {{ r.def_lost_cash }}
+Initial AvP :   {{ r.def_init_power }}
+Lost AvP :      {{ r.def_lost_power }}
+Losses of       <b>{{ r.def_perc }}%</b>
+{% for bombdata in r.bombing_data %}
+{{ bombdata }}{% endfor %}</pre>
+{% endfor %}{% endfor %}
+            </textarea><br />
+        </div>
+        <div>
+            <label for="planet">Select a planet :</label><br />
+                <select name="planet" id="planet">
+                    {% for planet in planet_names %}
+                        <option value="{{ planet }}">{{ planet }}</option>
+                    {% endfor %}
+                </select>
+        </div>
+<!--    </form>-->
+</body>
+</html>
