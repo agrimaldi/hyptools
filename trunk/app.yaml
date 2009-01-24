@@ -10,11 +10,11 @@ handlers:
 - url: /index\.html
   script: index.py
 
-- url: /(battle_reports|present_fleets)/?
+- url: /(battle_reports|present_fleets|hivemind)
   script: \1/index.py
 
-- url: /(battle_reports|present_fleets)/(result)
-  script: \1/index.py
+- url: /hivemind/(update|search)
+  script: /hivemind/index.py
 
 - url: /.*
   script: notfound.py
