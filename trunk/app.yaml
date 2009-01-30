@@ -13,7 +13,7 @@ handlers:
 - url: /(battle_reports|present_fleets|hivemind)
   script: \1/index.py
 
-- url: /hivemind/(update|search)
+- url: /hivemind/(update|search|login)
   script: /hivemind/index.py
 
 - url: /.*

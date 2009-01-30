@@ -11,9 +11,8 @@ from battle_reports.battlereports import Analysis
 
 class SubmitReport(webapp.RequestHandler):
     def get(self):
-        template_values = {}
         path = os.path.join(os.path.dirname(__file__), 'index.html')
-        self.response.out.write(template.render(path, template_values))
+        self.response.out.write(template.render(path, {}))
 
     def post(self):
         raw_report = cgi.escape(self.request.get('content'))
