@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title> .:: SSS °°° UPDATE DATABASE °°° ::. </title>
+</head>
+<body>
+    <h2> .:: SSS °°° UPDATE DATABASE °°° ::. </h2>
+    <form name="hapi" method="post" action="/hivemind/hivemindDB.py">
+<table border="0" cellspacing="2" cellpadding="2" align="center" class="content-table" width="600">
+	<tr>
+		<td class="content-form" width="200">Login:   </td>
+		<td class="content-form"><input type="text" name="loginname" value="" class="textfield-medium" maxlength="16"/></td>
+	</tr>
+	<tr>
+		<td class="content-form">HAPI Key:    </td>
+		<td class="content-form"><input type="text" name="hapikey" value="" class="textfield-medium" maxlength="32" /></td>
+
+	</tr>
+	<tr>
+  		<td colspan="2" class="content-form">
+   			<input type="submit" name="submit" value="Update" />
+  		</td>
+ 	</tr>
+</table>
+</form>
+</body>
+</html>
