@@ -8,9 +8,81 @@
 </head>
 <body>
     <h2> .:: Scout Screen Synchronizer ::. </h2>
-    <ul>
-        <li><a href="/hivemind/update">Update the database</a></li>
-        <li><a href="/hivemind/search">Search the database</a></li>
-    </ul>
+    <form method="post" action="/hivemind/update">
+        <div>
+            {{ status }}
+            <p><input type="submit" name="update" value="Update" /></p>
+        </div>
+    </form>
+    <form method="post" action="/hivemind/search">
+    <div>
+        <input type="text" name="searched_term" value="" id="searched_term" />
+        <input type="submit" name="search" value="Search" /><br />
+        <input type="radio" name="searchby" value="player" id="player" checked="checked" /><label for="player">Player</label><br />
+        <input type="radio" name="searchby" value="planet" id="planet" /><label for="planet">Planet</label><br />
+    </div>
+    </form>
+    {% ifequal searchby "planet" %}
+        <div>
+            <table border="1" cellspacing="0" cellpadding="1">
+                <caption>Present fleets on planet <strong>{{ searched_term }}</strong></caption>
+                <tr>
+                    <th>Owner</th>
+                    <th>Defending</th>
+                    <th>Race</th>
+                    <th>Cruisers</th>
+                    <th>Destroyers</th>
+                    <th>Bombers</th>
+                    <th>Scouts</th>
+                    <th>CAs</th>
+                    <th>GAs</th>
+                </tr>
+                {% for result in search_result %}
+                    <tr>
+                        <td>{{ result.owner.name }}</td>
+                        <td>{{ result.defend }}</td>
+                        <td>{{ result.race }}</td>
+                        <td>{{ result.cruisers }}</td>
+                        <td>{{ result.destroyers }}</td>
+                        <td>{{ result.bombers }}</td>
+                        <td>{{ result.scouts }}</td>
+                        <td>{{ result.carmies }}</td>
+                        <td>{{ result.garmies }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endifequal %}
+    {% ifequal searchby "player" %}
+        <div>
+            {% for result in search_result %}
+                <table border="1" cellspacing="0" cellpadding="1">
+                    <caption>Fleets owned by player <strong>{{ result.owner.name }}</strong> on planet <strong>{{ result.location.name }}</strong></caption>
+                    <tr>
+                        <th>Owner</th>
+                        <th>Defending</th>
+                        <th>Race</th>
+                        <th>Cruisers</th>
+                        <th>Destroyers</th>
+                        <th>Bombers</th>
+                        <th>Scouts</th>
+                        <th>CAs</th>
+                        <th>GAs</th>
+                    </tr>
+                    <tr>
+                        <td>{{ result.owner.name }}</td>
+                        <td>{{ result.defend }}</td>
+                        <td>{{ result.race }}</td>
+                        <td>{{ result.cruisers }}</td>
+                        <td>{{ result.destroyers }}</td>
+                        <td>{{ result.bombers }}</td>
+                        <td>{{ result.scouts }}</td>
+                        <td>{{ result.carmies }}</td>
+                        <td>{{ result.garmies }}</td>
+                    </tr>
+                </table><br />
+            {% endfor %}
+        </div>
+    {% endifequal %}
 </body>
 </html>
