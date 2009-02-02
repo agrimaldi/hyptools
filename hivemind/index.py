@@ -9,12 +9,6 @@ from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
-try:
-    # When deployed
-    from google.appengine.runtime import DeadlineExceededError
-except ImportError:
-    # In the development server
-    from google.appengine.runtime.apiproxy_errors import DeadlineExceededError
 from hivemind.hmdb import Fleet
 from hivemind.hivemind import Updater
 
@@ -23,7 +17,6 @@ class Const:
     HAPI_BASE_URL = 'http://www.hyperiums.com/servlet/HAPI'
     HAPI_REQ_URL = ''
     ALLOWED_USERS = ('sopo')
-    chunk_counter = 0
 
 
 class HAPIlogin(webapp.RequestHandler):
@@ -73,26 +66,26 @@ class Update(webapp.RequestHandler):
         chunk_counter = memcache.get("chunk_counter")
         response = memcache.get("response")
         if response.status_code == 200:
-                if chunk_counter == 0:
-                    database = Updater(response.content)
-                    database.chop(size=700)
-                    memcache.set(
-                        key="database",
-                        value=database,
-                        time=200
-                    )
-                database = memcache.get("database")
-                database.update(database.getChunkList()[chunk_counter])
+            if chunk_counter == 0:
+                database = Updater(response.content)
+                database.chop(size=700)
                 memcache.set(
                     key="database",
                     value=database,
                     time=200
                 )
-                if chunk_counter < len(database.getChunkList())-1:
-                    self.redirect("/hivemind/update")
-                else:
-                    memcache.set(key="chunk_counter", value=0, time=200)
-                status = 'Database successfully updated'
+            database = memcache.get("database")
+            database.update(database.getChunkList()[chunk_counter])
+            memcache.set(
+                key="database",
+                value=database,
+                time=60
+            )
+            if chunk_counter < len(database.getChunkList())-1:
+                self.redirect("/hivemind/update")
+            else:
+                memcache.set(key="chunk_counter", value=0, time=60)
+            status = 'Database successfully updated'
         else:
             status = 'Error while updating database'
         template_values = {
