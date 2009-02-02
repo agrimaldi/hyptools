@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from google.appengine.api import memcache
 from google.appengine.ext import db
 from hmdb import Planet
 from hmdb import Player
@@ -26,14 +25,14 @@ class Updater:
         self.__chunk_list.append(self.__raw_data_list[(i+1)*size:])
 
     def getChunkList(self):
-        """returns the list of chunks
+        """Returns the list of chunks
         """
         return self.__chunk_list
 
     def update(self, chunk):
         """
         Parses the chunk given as first argument, and updates the database
-        with the extracted values
+        with the extracted values.
         """
         first_planet = True
         first_fleet = True
@@ -45,7 +44,7 @@ class Updater:
             first_planet = False
         for info in chunk:
             value = info.split('=')[1]
-# Planet
+            # Planet
             if info.startswith('planet'):
                 qf = Fleet.gql('WHERE location_name = :1', value.lower())
                 db.delete(qf.fetch(50))
@@ -54,10 +53,10 @@ class Updater:
                 planet = Planet(key_name='_'.join(['planet', value.lower()]),
                                 name=value)
                 first_planet = False
-# Stasis
+            # Stasis
             elif info.startswith('stasis'):
                     planet.stasis = value
-# Fleet ID
+            # Fleet ID
             elif info.startswith('fleetid'):
                 if not first_fleet:
                     fleet.put()
@@ -67,10 +66,10 @@ class Updater:
                     location_name=planet.name.lower()
                 )
                 first_fleet = False
-# Fleet race
+            # Fleet race
             elif info.startswith('frace'):
                     fleet.race = value
-# Fleet owner
+            # Fleet owner
             elif info.startswith('owner'):
                 tmpq = db.GqlQuery(
                     "SELECT * FROM Player "
@@ -86,31 +85,31 @@ class Updater:
                     player.put()
                 fleet.owner = player
                 fleet.owner_name = value.lower()
-# Defend
+            # Defend
             elif info.startswith('defend'):
                     fleet.defend = value
-# Camouflage
+            # Camouflage
             elif info.startswith('camouf'):
                     fleet.camo = value
-# Mass bombing
+            # Mass bombing
             elif info.startswith('bombing'):
                     fleet.bombing = value
-# Scouts
+            # Scouts
             elif info.startswith('scou'):
                 fleet.scouts = value
-# Cruisers
+            # Cruisers
             elif info.startswith('crui'):
                 fleet.cruisers = value
-# Bombers
+            # Bombers
             elif info.startswith('bomb'):
                 fleet.bombers = value
-# Destroyers
+            # Destroyers
             elif info.startswith('dest'):
                 fleet.destroyers = value
-# Carried armies
+            # Carried armies
             elif info.startswith('carmies'):
                 fleet.carmies = value
-# Ground armies
+            # Ground armies
             elif info.startswith('garmies'):
                 fleet.garmies = value
         planet.put()
