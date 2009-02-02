@@ -1,0 +1,7 @@
+#summary A tool for storing and fetching fleet information.
+#labels Featured
+
+= Introduction =
+
+This tool allows several users to send the information about the foreign planets they have fleets on.
+Any other player can then search for a planet or a player, and learn what is the situation on that planet even if he has no fleets on it. That is basic info sharing.
