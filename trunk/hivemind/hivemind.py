@@ -13,10 +13,8 @@ class Updater:
     def __init__(self, raw_data=None):
         self.__raw_data_list = raw_data.split('&')[1:]
         self.__chunk_list = []
-        self.gcounter = 0
-        self.pcounter = 0
-#        self.__tmp_fleet = None
-#        self.__tmp_planet = None
+        self.__tmp_fleet = None
+        self.__tmp_planet = None
 
     def chop(self, size):
         """
@@ -28,8 +26,7 @@ class Updater:
         self.__chunk_list.append(self.__raw_data_list[(i+1)*size:])
 
     def getChunkList(self):
-        """
-        returns the list of chunks
+        """returns the list of chunks
         """
         return self.__chunk_list
 
@@ -40,26 +37,16 @@ class Updater:
         """
         first_planet = True
         first_fleet = True
-#        if self.__tmp_fleet:
-#            fleet = self.__tmp_fleet
-#            first_fleet = False
-#        if self.__tmp_planet:
-#            planet = self.__tmp_planet
-#            first_planet = False
-        tmp_fleet = memcache.get("tmp_fleet")
-        tmp_planet = memcache.get("tmp_planet")
-        if tmp_fleet:
-            fleet = tmp_fleet
+        if self.__tmp_fleet:
+            fleet = self.__tmp_fleet
             first_fleet = False
-        if tmp_planet:
-            planet = tmp_planet
+        if self.__tmp_planet:
+            planet = self.__tmp_planet
             first_planet = False
         for info in chunk:
-            self.gcounter += 1
             value = info.split('=')[1]
 # Planet
             if info.startswith('planet'):
-                self.pcounter += 1
                 qf = Fleet.gql('WHERE location_name = :1', value.lower())
                 db.delete(qf.fetch(50))
                 if not first_planet:
@@ -74,20 +61,28 @@ class Updater:
             elif info.startswith('fleetid'):
                 if not first_fleet:
                     fleet.put()
-                fleet = Fleet(key_name='_'.join(['fleet', value]),
-                              location=planet,
-                              location_name=planet.name.lower())
+                fleet = Fleet(
+                    key_name='_'.join(['fleet', value]),
+                    location=planet,
+                    location_name=planet.name.lower()
+                )
                 first_fleet = False
 # Fleet race
             elif info.startswith('frace'):
                     fleet.race = value
 # Fleet owner
             elif info.startswith('owner'):
-                tmpq = db.GqlQuery("SELECT * FROM Player WHERE name = :1", value)
+                tmpq = db.GqlQuery(
+                    "SELECT * FROM Player "
+                    "WHERE name = :1"
+                    , value
+                )
                 player = tmpq.get()
                 if not player:
-                    player = Player(key_name='_'.join(['player', value.lower()]),
-                                    name=value)
+                    player = Player(
+                        key_name='_'.join(['player', value.lower()]),
+                        name=value
+                    )
                     player.put()
                 fleet.owner = player
                 fleet.owner_name = value.lower()
@@ -120,12 +115,8 @@ class Updater:
                 fleet.garmies = value
         planet.put()
         fleet.put()
-        memcache.set_multi({
-            "fleet": fleet,
-            "planet": planet},
-            key_prefix="tmp_", time=200)
-#        self.__tmp_fleet = fleet
-#        self.__tmp_planet = planet
+        self.__tmp_fleet = fleet
+        self.__tmp_planet = planet
 
 
 def main():
