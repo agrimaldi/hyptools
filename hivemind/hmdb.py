@@ -1,13 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys
 from google.appengine.ext import db
 
 
 class Planet(db.Model):
     name = db.StringProperty(required=True)
-    stasis = db.BooleanProperty()
+    stasis = db.StringProperty()
 
 
 class Player(db.Model):
@@ -16,9 +15,9 @@ class Player(db.Model):
 
 class Fleet(db.Model):
     race = db.StringProperty()
-    defend = db.BooleanProperty()
-    camouf = db.BooleanProperty()
-    bombing = db.BooleanProperty()
+    defend = db.StringProperty()
+    camouf = db.StringProperty()
+    bombing = db.StringProperty()
     scouts = db.StringProperty()
     destroyers = db.StringProperty()
     bombers = db.StringProperty()
@@ -29,10 +28,3 @@ class Fleet(db.Model):
     location_name = db.StringProperty()
     owner = db.ReferenceProperty(Player)
     location = db.ReferenceProperty(Planet)
-
-
-def main():
-    pass
-
-if __name__ == '__main__':
-    sys.exit(main())
