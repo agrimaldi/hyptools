@@ -39,14 +39,16 @@ class HAPIlogin(webapp.RequestHandler):
                 Const.HAPI_BASE_URL,
                 '?game=Hyperiums5',
                 '&player=', login,
-                '&hapikey=', hapikey]))
+                '&hapikey=', hapikey
+            ]))
             if response.status_code == 200:
                 memcache.add(
                     key="hapi_req_url",
                     value='?'.join([
                         Const.HAPI_BASE_URL,
                         '&'.join(response.content.split('&')[0:-1])]),
-                    time=1800)
+                    time=1800
+                )
             path = os.path.join(os.path.dirname(__file__), 'index.html')
         else:
             path = os.path.join(os.path.dirname(__file__), 'error.html')
@@ -66,28 +68,35 @@ class Update(webapp.RequestHandler):
                 'request=getfleetsinfo',
                 'planet=*',
                 'data=foreign_planets'])),
-            time=200)
+            time=200
+        )
         chunk_counter = memcache.get("chunk_counter")
         response = memcache.get("response")
         if response.status_code == 200:
-#            try:
                 if chunk_counter == 0:
-                    memcache.add(key="database",
-                                 value=Updater(response.content),
-                                 time=200)
+                    database = Updater(response.content)
+                    database.chop(size=700)
+                    memcache.set(
+                        key="database",
+                        value=database,
+                        time=200
+                    )
                 database = memcache.get("database")
-                database.chop(size=500)
                 database.update(database.getChunkList()[chunk_counter])
-                self.redirect("/hivemind/update")
-#            except:
-#                print
-#                print chunk_counter
-#                print(database.gcounter, database.pcounter)
+                memcache.set(
+                    key="database",
+                    value=database,
+                    time=200
+                )
+                if chunk_counter < len(database.getChunkList())-1:
+                    self.redirect("/hivemind/update")
+                else:
+                    memcache.set(key="chunk_counter", value=0, time=200)
                 status = 'Database successfully updated'
         else:
             status = 'Error while updating database'
         template_values = {
-#            'status': status
+            'status': status
         }
         path = os.path.join(os.path.dirname(__file__), 'index.html')
         self.response.out.write(template.render(path, template_values))
@@ -98,13 +107,17 @@ class Search(webapp.RequestHandler):
         searchby = self.request.get('searchby')
         searched_term = cgi.escape(self.request.get('searched_term')).lower()
         if searchby == 'player':
-            query = Fleet.gql("WHERE owner_name = :1 "
-                              "ORDER BY location_name",
-                              searched_term)
+            query = Fleet.gql(
+                "WHERE owner_name = :1 "
+                "ORDER BY location_name",
+                searched_term
+            )
         elif searchby == 'planet':
-            query = Fleet.gql("WHERE location_name = :1 "
-                              "ORDER BY owner_name",
-                              searched_term)
+            query = Fleet.gql(
+                "WHERE location_name = :1 "
+                "ORDER BY owner_name",
+                searched_term
+            )
         results = query.fetch(999)
         template_values = {
             'searched_term': searched_term,
