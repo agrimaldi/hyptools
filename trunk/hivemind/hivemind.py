@@ -17,17 +17,11 @@ class Updater:
 
     def chop(self, size):
         """
-        Splits the data list in <lenght> elements long lists
+        Splits the data list in <size> elements long lists
         """
-        n_chunks = len(self.__raw_data_list)/size
-        for i in range(n_chunks):
+        for i in range(len(self.__raw_data_list)/size):
             self.__chunk_list.append(self.__raw_data_list[i*size:i*size+size])
         self.__chunk_list.append(self.__raw_data_list[(i+1)*size:])
-
-    def getChunkList(self):
-        """Returns the list of chunks
-        """
-        return self.__chunk_list
 
     def update(self, chunk):
         """
@@ -116,6 +110,11 @@ class Updater:
         fleet.put()
         self.__tmp_fleet = fleet
         self.__tmp_planet = planet
+
+    def getChunkList(self):
+        return self.__chunk_list
+
+    chunk_list = property(getChunkList)
 
 
 def main():
