@@ -15,8 +15,7 @@ from hivemind.hivemind import Updater
 
 class Const:
     HAPI_BASE_URL = 'http://www.hyperiums.com/servlet/HAPI'
-    HAPI_REQ_URL = ''
-    ALLOWED_USERS = ('sopo')
+    ALLOWED_USERS = ("sopo", "zeddie", "jester.8")
 
 
 class HAPIlogin(webapp.RequestHandler):
@@ -35,7 +34,7 @@ class HAPIlogin(webapp.RequestHandler):
                 '&hapikey=', hapikey
             ]))
             if response.status_code == 200:
-                memcache.add(
+                memcache.set(
                     key="hapi_req_url",
                     value='?'.join([
                         Const.HAPI_BASE_URL,
@@ -75,13 +74,13 @@ class Update(webapp.RequestHandler):
                     time=200
                 )
             database = memcache.get("database")
-            database.update(database.getChunkList()[chunk_counter])
+            database.update(database.chunk_list[chunk_counter])
             memcache.set(
                 key="database",
                 value=database,
                 time=60
             )
-            if chunk_counter < len(database.getChunkList())-1:
+            if chunk_counter < len(database.chunk_list)-1:
                 self.redirect("/hivemind/update")
             else:
                 memcache.set(key="chunk_counter", value=0, time=60)
