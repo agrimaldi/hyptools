@@ -6,11 +6,6 @@
 This tool allows several users to send the information about the foreign planets they have fleets on.
 Any other player can then search for a planet or a player, and learn what is the situation on that planet even if he has no fleets on it. That is basic info sharing.
 
-= A little history =
-
-When WindHaven started his massive, coordinated scout screen operation, I thought it was really a great idea. But after several days, I found that the coordination part was a bit lacking.
-Later, when Crazedemon and Dagda attacked our core, Zeddie stated that we lacked coordination, communication, and overall speed in our reaction. During a whole week, we played hide and seek, losing precious time trying to locate them.
-
 = How does it work =
 
 If a player with fleets on a planet can see every other fleets on that planet, that would be just great if his allies had a way to know the "planet status" without the first player having to actively copy past the info.
