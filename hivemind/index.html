@@ -36,18 +36,33 @@
                     <th>Scouts</th>
                     <th>CAs</th>
                     <th>GAs</th>
+<!--                    <th>N/A</th>-->
                 </tr>
-                {% for result in search_result %}
+                {% for result in results %}
                     <tr>
                         <td>{{ result.owner.name }}</td>
                         <td>{{ result.defend }}</td>
-                        <td>{{ result.race }}</td>
+                        {% ifequal result.race "0" %}
+                            <td>Human</td>
+                        {% endifequal %}
+                        {% ifequal result.race "1" %}
+                            <td>Azterk</td>
+                        {% endifequal %}
+                        {% ifequal result.race "2" %}
+                            <td>Xillor</td>
+                        {% endifequal %}
                         <td>{{ result.cruisers }}</td>
                         <td>{{ result.destroyers }}</td>
                         <td>{{ result.bombers }}</td>
                         <td>{{ result.scouts }}</td>
-                        <td>{{ result.carmies }}</td>
+                        {% if result.carmies %}
+                            <td>{{ result.carmies }}</td>
+                        {% else %}
+                            <td>-</td>
+                        {% endif %}
                         <td>{{ result.garmies }}</td>
+<!--                        <td>{{ result.delay }}</td>-->
+
                     </tr>
                 {% endfor %}
             </table>
