@@ -13,9 +13,8 @@ from hivemind.hmdb import Fleet
 from hivemind.hivemind import Updater
 
 
-class Const:
-    HAPI_BASE_URL = 'http://www.hyperiums.com/servlet/HAPI'
-    ALLOWED_USERS = ("sopo", "zeddie", "jester.8")
+HAPI_BASE_URL = 'http://www.hyperiums.com/servlet/HAPI'
+ALLOWED_USERS = ("sopo", "zeddie", "jester.8")
 
 
 class HAPIlogin(webapp.RequestHandler):
@@ -26,9 +25,9 @@ class HAPIlogin(webapp.RequestHandler):
     def post(self):
         login = cgi.escape(self.request.get('login')).lower()
         hapikey = cgi.escape(self.request.get('hapikey'))
-        if login in Const.ALLOWED_USERS:
+        if login in ALLOWED_USERS:
             response = urlfetch.fetch(''.join([
-                Const.HAPI_BASE_URL,
+                HAPI_BASE_URL,
                 '?game=Hyperiums5',
                 '&player=', login,
                 '&hapikey=', hapikey
@@ -37,7 +36,7 @@ class HAPIlogin(webapp.RequestHandler):
                 memcache.set(
                     key="hapi_req_url",
                     value='?'.join([
-                        Const.HAPI_BASE_URL,
+                        HAPI_BASE_URL,
                         '&'.join(response.content.split('&')[0:-1])]),
                     time=1800
                 )
@@ -98,6 +97,7 @@ class Search(webapp.RequestHandler):
     def post(self):
         searchby = self.request.get('searchby')
         searched_term = cgi.escape(self.request.get('searched_term')).lower()
+        results = []
         if searchby == 'player':
             query = Fleet.gql(
                 "WHERE owner_name = :1 "
@@ -110,11 +110,13 @@ class Search(webapp.RequestHandler):
                 "ORDER BY owner_name",
                 searched_term
             )
-        results = query.fetch(999)
+            for result in query:
+                results.append(result)
+            searched_term = results[0].location.name
         template_values = {
             'searched_term': searched_term,
             'searchby': searchby,
-            'search_result': results
+            'results': results
         }
         path = os.path.join(os.path.dirname(__file__), 'index.html')
         self.response.out.write(template.render(path, template_values))

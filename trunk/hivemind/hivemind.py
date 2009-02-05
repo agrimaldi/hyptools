@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys
 from google.appengine.ext import db
 from hmdb import Planet
 from hmdb import Player
@@ -38,19 +37,21 @@ class Updater:
             first_planet = False
         for info in chunk:
             value = info.split('=')[1]
-            # Planet
             if info.startswith('planet'):
-                qf = Fleet.gql('WHERE location_name = :1', value.lower())
+                qf = Fleet.gql(
+                    'WHERE location_name = :1',
+                    value.lower()
+                )
                 db.delete(qf.fetch(50))
                 if not first_planet:
                     planet.put()
-                planet = Planet(key_name='_'.join(['planet', value.lower()]),
-                                name=value)
+                planet = Planet(
+                    key_name='_'.join(['planet', value.lower()]),
+                    name=value
+                )
                 first_planet = False
-            # Stasis
             elif info.startswith('stasis'):
-                    planet.stasis = value
-            # Fleet ID
+                planet.stasis = value
             elif info.startswith('fleetid'):
                 if not first_fleet:
                     fleet.put()
@@ -60,15 +61,13 @@ class Updater:
                     location_name=planet.name.lower()
                 )
                 first_fleet = False
-            # Fleet race
             elif info.startswith('frace'):
-                    fleet.race = value
-            # Fleet owner
+                fleet.race = value
             elif info.startswith('owner'):
                 tmpq = db.GqlQuery(
                     "SELECT * FROM Player "
-                    "WHERE name = :1"
-                    , value
+                    "WHERE name = :1",
+                    value
                 )
                 player = tmpq.get()
                 if not player:
@@ -79,31 +78,24 @@ class Updater:
                     player.put()
                 fleet.owner = player
                 fleet.owner_name = value.lower()
-            # Defend
             elif info.startswith('defend'):
-                    fleet.defend = value
-            # Camouflage
+                fleet.defend = value
             elif info.startswith('camouf'):
-                    fleet.camo = value
-            # Mass bombing
+                fleet.camo = value
             elif info.startswith('bombing'):
-                    fleet.bombing = value
-            # Scouts
+                fleet.bombing = value
+            elif info.startswith('delay'):
+                fleet.delay = value
             elif info.startswith('scou'):
                 fleet.scouts = value
-            # Cruisers
             elif info.startswith('crui'):
                 fleet.cruisers = value
-            # Bombers
             elif info.startswith('bomb'):
                 fleet.bombers = value
-            # Destroyers
             elif info.startswith('dest'):
                 fleet.destroyers = value
-            # Carried armies
             elif info.startswith('carmies'):
                 fleet.carmies = value
-            # Ground armies
             elif info.startswith('garmies'):
                 fleet.garmies = value
         planet.put()
@@ -111,14 +103,14 @@ class Updater:
         self.__tmp_fleet = fleet
         self.__tmp_planet = planet
 
-    def getChunkList(self):
+    def get_chuck_list(self):
         return self.__chunk_list
 
-    chunk_list = property(getChunkList)
+    chunk_list = property(get_chuck_list)
 
 
 def main():
     pass
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main()
