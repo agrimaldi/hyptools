@@ -1,18 +1,33 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import re
 from google.appengine.ext import db
 from hmdb import Planet
 from hmdb import Player
 from hmdb import Fleet
 
 
+NUM_RGX = re.compile(r'(\d*\.?\d+)(?==)')
+
 class Updater:
     def __init__(self, raw_data=None):
-        self.__raw_data_list = raw_data.split('&')[1:]
+        self.__raw_data_list = NUM_RGX.sub('', raw_data).split('&')[1:]
         self.__chunk_list = []
         self.__tmp_fleet = None
         self.__tmp_planet = None
+        self.__keys = {
+                'defend': "set_defend",
+                'camouf': "set_camouf",
+                'bombing': "set_bombing",
+                'scou': "set_scou",
+                'crui': "set_crui",
+                'bomb': "set_bomb",
+                'dest': "set_dest",
+                'carmies': "set_carmies",
+                'garmies': "set_garmies",
+                'frace': "set_frace"
+            }
 
     def chop(self, size):
         """
@@ -33,15 +48,24 @@ class Updater:
             fleet = self.__tmp_fleet
             first_fleet = False
         if self.__tmp_planet:
+            qf = Fleet.gql(
+                'WHERE location_name = :1',
+                self.__tmp_planet.name.lower()
+            )
             planet = self.__tmp_planet
             first_planet = False
         for info in chunk:
-            value = info.split('=')[1]
-            if info.startswith('planet'):
-                qf = Fleet.gql(
-                    'WHERE location_name = :1',
-                    value.lower()
-                )
+            key, value = info.split('=')
+            if key in self.__keys:
+                fleet.__getattribute__(self.__keys[key])(value)
+            elif info.startswith('planet'):
+                if first_planet:
+                    qf = Fleet.gql(
+                        'WHERE location_name = :1',
+                        value.lower()
+                    )
+                else:
+                    qf.bind(value.lower())
                 db.delete(qf.fetch(50))
                 if not first_planet:
                     planet.put()
@@ -50,8 +74,6 @@ class Updater:
                     name=value
                 )
                 first_planet = False
-            elif info.startswith('stasis'):
-                planet.stasis = value
             elif info.startswith('fleetid'):
                 if not first_fleet:
                     fleet.put()
@@ -61,15 +83,12 @@ class Updater:
                     location_name=planet.name.lower()
                 )
                 first_fleet = False
-            elif info.startswith('frace'):
-                fleet.race = value
             elif info.startswith('owner'):
-                tmpq = db.GqlQuery(
+                player = db.GqlQuery(
                     "SELECT * FROM Player "
                     "WHERE name = :1",
                     value
-                )
-                player = tmpq.get()
+                ).get()
                 if not player:
                     player = Player(
                         key_name='_'.join(['player', value.lower()]),
@@ -78,26 +97,8 @@ class Updater:
                     player.put()
                 fleet.owner = player
                 fleet.owner_name = value.lower()
-            elif info.startswith('defend'):
-                fleet.defend = value
-            elif info.startswith('camouf'):
-                fleet.camo = value
-            elif info.startswith('bombing'):
-                fleet.bombing = value
-            elif info.startswith('delay'):
-                fleet.delay = value
-            elif info.startswith('scou'):
-                fleet.scouts = value
-            elif info.startswith('crui'):
-                fleet.cruisers = value
-            elif info.startswith('bomb'):
-                fleet.bombers = value
-            elif info.startswith('dest'):
-                fleet.destroyers = value
-            elif info.startswith('carmies'):
-                fleet.carmies = value
-            elif info.startswith('garmies'):
-                fleet.garmies = value
+            elif info.startswith('stasis'):
+                planet.stasis = value
         planet.put()
         fleet.put()
         self.__tmp_fleet = fleet
