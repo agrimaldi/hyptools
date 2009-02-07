@@ -14,7 +14,7 @@ from hivemind.hivemind import Updater
 
 
 HAPI_BASE_URL = 'http://www.hyperiums.com/servlet/HAPI'
-ALLOWED_USERS = ("sopo", "zeddie", "jester.8")
+ALLOWED_USERS = ("sopo", "zeddie", "jester.8", "keffer")
 
 
 class HAPIlogin(webapp.RequestHandler):
@@ -104,6 +104,8 @@ class Search(webapp.RequestHandler):
                 "ORDER BY location_name",
                 searched_term
             )
+            for result in query:
+                results.append(result)
         elif searchby == 'planet':
             query = Fleet.gql(
                 "WHERE location_name = :1 "
@@ -111,6 +113,8 @@ class Search(webapp.RequestHandler):
                 searched_term
             )
             for result in query:
+#                print
+#                print(result.owner.fleets).get().owner_name
                 results.append(result)
             searched_term = results[0].location.name
         template_values = {
