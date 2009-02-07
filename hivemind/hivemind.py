@@ -44,6 +44,7 @@ class Updater:
         """
         first_planet = True
         first_fleet = True
+        first_player = True
         if self.__tmp_fleet:
             fleet = self.__tmp_fleet
             first_fleet = False
@@ -84,11 +85,15 @@ class Updater:
                 )
                 first_fleet = False
             elif info.startswith('owner'):
-                player = db.GqlQuery(
-                    "SELECT * FROM Player "
-                    "WHERE name = :1",
-                    value
-                ).get()
+                if first_player:
+                    qp = Player.gql(
+                        "WHERE name = :1",
+                        value
+                    )
+                    first_player = False
+                else:
+                    qp.bind(value)
+                player = qp.get()
                 if not player:
                     player = Player(
                         key_name='_'.join(['player', value.lower()]),

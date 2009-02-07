@@ -7,10 +7,12 @@ from google.appengine.ext import db
 class Planet(db.Model):
     name = db.StringProperty(required=True)
     stasis = db.StringProperty()
+#    players = db.StringListProperty()
 
 
 class Player(db.Model):
     name = db.StringProperty(required=True)
+#    locations = db.StringListProperty()
 
 
 class Fleet(db.Model):
