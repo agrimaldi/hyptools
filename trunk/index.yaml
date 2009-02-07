@@ -16,7 +16,7 @@ indexes:
   - name: location_name
   - name: owner_name
 
-# Used 4 times in query history.
+# Used 5 times in query history.
 - kind: Fleet
   properties:
   - name: owner_name

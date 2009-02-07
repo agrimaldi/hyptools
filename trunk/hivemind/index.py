@@ -14,7 +14,7 @@ from hivemind.hivemind import Updater
 
 
 HAPI_BASE_URL = 'http://www.hyperiums.com/servlet/HAPI'
-ALLOWED_USERS = ("sopo", "zeddie", "jester.8", "keffer")
+ALLOWED_USERS = ("sopo", "zeddie", "jester.8", "keffer", "gerbo")
 
 
 class HAPIlogin(webapp.RequestHandler):
@@ -52,16 +52,18 @@ class Update(webapp.RequestHandler):
         self.post()
 
     def post(self):
-        memcache.add(
-            key="response",
-            value=urlfetch.fetch('&'.join([
+        chunk_counter = memcache.get("chunk_counter")
+        if chunk_counter == 0:
+            tmp_resp = urlfetch.fetch('&'.join([
                 memcache.get("hapi_req_url"),
                 'request=getfleetsinfo',
                 'planet=*',
-                'data=foreign_planets'])),
-            time=200
-        )
-        chunk_counter = memcache.get("chunk_counter")
+                'data=foreign_planets']))
+            memcache.add(
+                key="response",
+                value=tmp_resp,
+                time=200
+            )
         response = memcache.get("response")
         if response.status_code == 200:
             if chunk_counter == 0:
@@ -82,7 +84,7 @@ class Update(webapp.RequestHandler):
             if chunk_counter < len(database.chunk_list)-1:
                 self.redirect("/hivemind/update")
             else:
-                memcache.set(key="chunk_counter", value=0, time=60)
+                memcache.delete(key="chunk_counter")
             status = 'Database successfully updated'
         else:
             status = 'Error while updating database'
@@ -97,7 +99,9 @@ class Search(webapp.RequestHandler):
     def post(self):
         searchby = self.request.get('searchby')
         searched_term = cgi.escape(self.request.get('searched_term')).lower()
-        results = []
+        res_fleets = []
+        res_players = []
+        res_planets = []
         if searchby == 'player':
             query = Fleet.gql(
                 "WHERE owner_name = :1 "
@@ -105,7 +109,9 @@ class Search(webapp.RequestHandler):
                 searched_term
             )
             for result in query:
-                results.append(result)
+                if result.owner not in res_players:
+                    res_players.append(result.owner)
+                res_fleets.append(result)
         elif searchby == 'planet':
             query = Fleet.gql(
                 "WHERE location_name = :1 "
@@ -115,12 +121,12 @@ class Search(webapp.RequestHandler):
             for result in query:
 #                print
 #                print(result.owner.fleets).get().owner_name
-                results.append(result)
-            searched_term = results[0].location.name
+                res_fleets.append(result)
+            searched_term = res_fleets[0].location.name
         template_values = {
             'searched_term': searched_term,
             'searchby': searchby,
-            'results': results
+            'results': res_fleets
         }
         path = os.path.join(os.path.dirname(__file__), 'index.html')
         self.response.out.write(template.render(path, template_values))
