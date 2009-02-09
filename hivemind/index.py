@@ -68,7 +68,7 @@ class Update(webapp.RequestHandler):
         if response.status_code == 200:
             if chunk_counter == 0:
                 database = Updater(response.content)
-                database.chop(size=700)
+                database.chop(chunk_size=700)
                 memcache.set(
                     key="database",
                     value=database,
@@ -102,6 +102,7 @@ class Search(webapp.RequestHandler):
         res_fleets = []
         res_players = []
         res_planets = []
+
         if searchby == 'player':
             query = Fleet.gql(
                 "WHERE owner_name = :1 "
@@ -109,9 +110,18 @@ class Search(webapp.RequestHandler):
                 searched_term
             )
             for result in query:
-                if result.owner not in res_players:
-                    res_players.append(result.owner)
-                res_fleets.append(result)
+                if result.location not in res_planets:
+                    res_planets.append(result.location)
+                    print res_planets
+                    print result
+                    print result.location.name
+                    print
+#                res_fleets.append(result)
+            template_values = {
+                'searchby': searchby,
+                'planets': res_planets
+            }
+
         elif searchby == 'planet':
             query = Fleet.gql(
                 "WHERE location_name = :1 "
@@ -119,15 +129,18 @@ class Search(webapp.RequestHandler):
                 searched_term
             )
             for result in query:
-#                print
-#                print(result.owner.fleets).get().owner_name
                 res_fleets.append(result)
-            searched_term = res_fleets[0].location.name
-        template_values = {
-            'searched_term': searched_term,
-            'searchby': searchby,
-            'results': res_fleets
-        }
+            template_values = {
+                'searchby': searchby,
+                'location': res_fleets[0].location,
+                'res_fleets': res_fleets
+            }
+#        template_values = {
+##            'searched_term': searched_term,
+#            'searchby': searchby,
+#            'res_location': res_location,
+#            'results': res_fleets
+#        }
         path = os.path.join(os.path.dirname(__file__), 'index.html')
         self.response.out.write(template.render(path, template_values))
 
