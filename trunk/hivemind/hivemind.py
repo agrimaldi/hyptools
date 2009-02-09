@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+import datetime
 from google.appengine.ext import db
 from hmdb import Planet
 from hmdb import Player
@@ -13,7 +14,9 @@ NUM_RGX = re.compile(r'(\d*\.?\d+)(?==)')
 class Updater:
     def __init__(self, raw_data=None):
         self.__raw_data_list = NUM_RGX.sub('', raw_data).split('&')[1:]
+        self.__date = datetime.datetime.now()
         self.__chunk_list = []
+        self.__planet_key_list = []
         self.__tmp_fleet = None
         self.__tmp_planet = None
         self.__keys = {
@@ -29,13 +32,13 @@ class Updater:
                 'frace': "set_frace"
             }
 
-    def chop(self, size):
+    def chop(self, chunk_size):
         """
         Splits the data list in <size> elements long lists
         """
-        for i in range(len(self.__raw_data_list)/size):
-            self.__chunk_list.append(self.__raw_data_list[i*size:i*size+size])
-        self.__chunk_list.append(self.__raw_data_list[(i+1)*size:])
+        self.__chunk_list = []
+        for i in xrange(0, len(self.__raw_data_list), chunk_size):
+            self.__chunk_list.append(self.__raw_data_list[i:i+chunk_size])
 
     def update(self, chunk):
         """
@@ -67,13 +70,15 @@ class Updater:
                     )
                 else:
                     qf.bind(value.lower())
-                db.delete(qf.fetch(50))
-                if not first_planet:
                     planet.put()
-                planet = Planet(
-                    key_name='_'.join(['planet', value.lower()]),
-                    name=value
-                )
+                db.delete(qf.fetch(50))
+                if value not in self.__planet_key_list:
+                    self.__planet_key_list.append(value)
+                    planet = Planet(
+                        key_name='_'.join(['planet', value.lower()]),
+                        name=value,
+                        date=self.__date
+                    )
                 first_planet = False
             elif info.startswith('fleetid'):
                 if not first_fleet:

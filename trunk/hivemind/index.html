@@ -25,7 +25,7 @@
     {% ifequal searchby "planet" %}
         <div id="sb_planet">
             <table border="1" cellspacing="0" cellpadding="1">
-                <caption>Present fleets on planet <strong>{{ searched_term }}</strong></caption>
+                <caption>Present fleets on planet <strong>{{ location.name }}</strong></caption>
                 <tr>
                     <th>Owner</th>
                     <th>Defending</th>
@@ -37,33 +37,34 @@
                     <th>CAs</th>
                     <th>GAs</th>
                 </tr>
-                {% for result in results %}
+                {% for fleet in res_fleets %}
                     <tr>
-                        <td>{{ result.owner.name }}</td>
-                        <td>{{ result.defend }}</td>
-                        {% ifequal result.frace "0" %}
+                        <td>{{ fleet.owner.name }}</td>
+                        <td>{{ fleet.defend }}</td>
+                        {% ifequal fleet.frace "0" %}
                             <td>Human</td>
                         {% endifequal %}
-                        {% ifequal result.frace "1" %}
+                        {% ifequal fleet.frace "1" %}
                             <td>Azterk</td>
                         {% endifequal %}
-                        {% ifequal result.frace "2" %}
+                        {% ifequal fleet.frace "2" %}
                             <td>Xillor</td>
                         {% endifequal %}
-                        <td>{{ result.crui }}</td>
-                        <td>{{ result.dest }}</td>
-                        <td>{{ result.bomb }}</td>
-                        <td>{{ result.scou }}</td>
-                        <td>{{ result.carmies }}</td>
-                        <td>{{ result.garmies }}</td>
+                        <td>{{ fleet.crui }}</td>
+                        <td>{{ fleet.dest }}</td>
+                        <td>{{ fleet.bomb }}</td>
+                        <td>{{ fleet.scou }}</td>
+                        <td>{{ fleet.carmies }}</td>
+                        <td>{{ fleet.garmies }}</td>
                     </tr>
                 {% endfor %}
             </table>
+            <p>Last update : <strong>{{ location.date.date }}</strong> at <strong>{{ location.date.hour }}:{{ location.date.minute }}</strong> ST</p>
         </div>
     {% endifequal %}
     {% ifequal searchby "player" %}
         <div id="sb_player">
-            {% for result in results %}
+            {% for planet in planets %}
                 <table border="1" cellspacing="0" cellpadding="1">
                     <caption>Fleets owned by player <strong>{{ result.owner.name }}</strong> on planet <strong>{{ result.location.name }}</strong></caption>
                     <tr>
@@ -77,27 +78,27 @@
                         <th>CAs</th>
                         <th>GAs</th>
                     </tr>
+                    {{ planet.fleet }}
+                    {% for fleet in planet.fleet %}
                     <tr>
-<!--                        <td>{{ result.owner.fleets }}</td>-->
-
-                        <td>{{ result.owner.name }}</td>
-                        <td>{{ result.defend }}</td>
-                        {% ifequal result.frace "0" %}
+                        <td>{{ fleet.defend }}</td>
+                        {% ifequal fleet.frace "0" %}
                             <td>Human</td>
                         {% endifequal %}
-                        {% ifequal result.frace "1" %}
+                        {% ifequal fleet.frace "1" %}
                             <td>Azterk</td>
                         {% endifequal %}
-                        {% ifequal result.frace "2" %}
+                        {% ifequal fleet.frace "2" %}
                             <td>Xillor</td>
                         {% endifequal %}
-                        <td>{{ result.crui }}</td>
-                        <td>{{ result.dest }}</td>
-                        <td>{{ result.bomb }}</td>
-                        <td>{{ result.scou }}</td>
-                        <td>{{ result.carmies }}</td>
-                        <td>{{ result.garmies }}</td>
+                        <td>{{ fleet.crui }}</td>
+                        <td>{{ fleet.dest }}</td>
+                        <td>{{ fleet.bomb }}</td>
+                        <td>{{ fleet.scou }}</td>
+                        <td>{{ fleet.carmies }}</td>
+                        <td>{{ fleet.garmies }}</td>
                     </tr>
+                    {% endfor %}
                 </table><br />
             {% endfor %}
         </div>
