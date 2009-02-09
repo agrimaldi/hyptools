@@ -4,6 +4,7 @@
 import os
 import cgi
 from google.appengine.api import urlfetch
+from google.appengine.api.urlfetch import DownloadError
 from google.appengine.api import memcache
 from google.appengine.ext import db
 from google.appengine.ext import webapp
@@ -26,23 +27,26 @@ class HAPIlogin(webapp.RequestHandler):
         login = cgi.escape(self.request.get('login')).lower()
         hapikey = cgi.escape(self.request.get('hapikey'))
         if login in ALLOWED_USERS:
-            response = urlfetch.fetch(''.join([
-                HAPI_BASE_URL,
-                '?game=Hyperiums5',
-                '&player=', login,
-                '&hapikey=', hapikey
-            ]))
-            if response.status_code == 200:
-                memcache.set(
-                    key="hapi_req_url",
-                    value='?'.join([
-                        HAPI_BASE_URL,
-                        '&'.join(response.content.split('&')[0:-1])]),
-                    time=1800
-                )
-            path = os.path.join(os.path.dirname(__file__), 'index.html')
+            try:
+                response = urlfetch.fetch(''.join([
+                    HAPI_BASE_URL,
+                    '?game=Hyperiums5',
+                    '&player=', login,
+                    '&hapikey=', hapikey
+                ]))
+                if response.status_code == 200:
+                    memcache.set(
+                        key="hapi_req_url",
+                        value='?'.join([
+                            HAPI_BASE_URL,
+                            '&'.join(response.content.split('&')[0:-1])]),
+                        time=900
+                    )
+                path = os.path.join(os.path.dirname(__file__), 'index.html')
+            except DownloadError:
+                path = os.path.join(os.path.dirname(__file__), 'auth_fail.html')
         else:
-            path = os.path.join(os.path.dirname(__file__), 'error.html')
+            path = os.path.join(os.path.dirname(__file__), 'access_denied.html')
         self.response.out.write(template.render(path, {}))
 
 
@@ -62,17 +66,17 @@ class Update(webapp.RequestHandler):
             memcache.add(
                 key="response",
                 value=tmp_resp,
-                time=200
+                time=60
             )
         response = memcache.get("response")
         if response.status_code == 200:
             if chunk_counter == 0:
                 database = Updater(response.content)
-                database.chop(chunk_size=700)
+                database.chop(chunk_size=800)
                 memcache.set(
                     key="database",
                     value=database,
-                    time=200
+                    time=60
                 )
             database = memcache.get("database")
             database.update(database.chunk_list[chunk_counter])
@@ -85,11 +89,11 @@ class Update(webapp.RequestHandler):
                 self.redirect("/hivemind/update")
             else:
                 memcache.delete(key="chunk_counter")
-            status = 'Database successfully updated'
+            update_status = 'Database successfully updated'
         else:
-            status = 'Error while updating database'
+            update_status = 'Error while updating database'
         template_values = {
-            'status': status
+            'update_status': update_status
         }
         path = os.path.join(os.path.dirname(__file__), 'index.html')
         self.response.out.write(template.render(path, template_values))
@@ -119,7 +123,7 @@ class Search(webapp.RequestHandler):
 #                res_fleets.append(result)
             template_values = {
                 'searchby': searchby,
-                'planets': res_planets
+                'res_planets': res_planets
             }
 
         elif searchby == 'planet':
@@ -130,11 +134,16 @@ class Search(webapp.RequestHandler):
             )
             for result in query:
                 res_fleets.append(result)
-            template_values = {
-                'searchby': searchby,
-                'location': res_fleets[0].location,
-                'res_fleets': res_fleets
-            }
+            if res_fleets:
+                template_values = {
+                    'searchby': searchby,
+                    'location': res_fleets[0].location,
+                    'res_fleets': res_fleets
+                }
+            else:
+                template_values = {
+                    'search_status': "Planet not found"
+                }
 #        template_values = {
 ##            'searched_term': searched_term,
 #            'searchby': searchby,
@@ -152,7 +161,7 @@ application = webapp.WSGIApplication([
     debug=True)
 
 def main():
-    memcache.add(key="chunk_counter", value=0, time=200)
+    memcache.add(key="chunk_counter", value=0, time=60)
     run_wsgi_app(application)
 
 if __name__ == "__main__":

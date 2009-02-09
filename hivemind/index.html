@@ -10,7 +10,7 @@
     <h2> .:: Scout Screen Synchronizer ::. </h2>
     <form method="post" action="/hivemind/update">
         <div id="submit_update">
-            {{ status }}
+            {{ update_status }}
             <p><input type="submit" name="update" value="Update" /></p>
         </div>
     </form>
@@ -22,6 +22,7 @@
             <input type="radio" name="searchby" value="planet" id="planet" /><label for="planet">Planet</label><br />
         </div>
     </form>
+    <p>{{ search_status }}</p>
     {% ifequal searchby "planet" %}
         <div id="sb_planet">
             <table border="1" cellspacing="0" cellpadding="1">
