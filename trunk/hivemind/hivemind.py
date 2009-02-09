@@ -16,7 +16,6 @@ class Updater:
         self.__raw_data_list = NUM_RGX.sub('', raw_data).split('&')[1:]
         self.__date = datetime.datetime.now()
         self.__chunk_list = []
-        self.__planet_key_list = []
         self.__tmp_fleet = None
         self.__tmp_planet = None
         self.__keys = {
@@ -34,7 +33,7 @@ class Updater:
 
     def chop(self, chunk_size):
         """
-        Splits the data list in <size> elements long lists
+        Splits the data list in a list of <chunk_size> lists
         """
         self.__chunk_list = []
         for i in xrange(0, len(self.__raw_data_list), chunk_size):
@@ -71,14 +70,13 @@ class Updater:
                 else:
                     qf.bind(value.lower())
                     planet.put()
-                db.delete(qf.fetch(50))
-                if value not in self.__planet_key_list:
-                    self.__planet_key_list.append(value)
-                    planet = Planet(
-                        key_name='_'.join(['planet', value.lower()]),
-                        name=value,
-                        date=self.__date
-                    )
+# TODO : Only delete fleets on modified planets
+                db.delete(qf.fetch(100))
+                planet = Planet(
+                    key_name='_'.join(['planet', value.lower()]),
+                    name=value,
+                    date=self.__date
+                )
                 first_planet = False
             elif info.startswith('fleetid'):
                 if not first_fleet:

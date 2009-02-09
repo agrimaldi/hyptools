@@ -44,8 +44,8 @@ class Fleet(db.Model):
     def set_camouf(self, status):
         self.camouf = status
 
-    def set_bombing(self, state):
-        self.bombing = state
+    def set_bombing(self, status):
+        self.bombing = status
 
     def set_scou(self, value):
         self.scou = value
