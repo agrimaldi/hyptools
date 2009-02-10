@@ -18,15 +18,15 @@
         <div id="submit_search">
             <input type="text" name="searched_term" value="" id="searched_term" />
             <input type="submit" name="search" value="Search" /><br />
-            <input type="radio" name="searchby" value="player" id="player" checked="checked" /><label for="player">Player</label><br />
-            <input type="radio" name="searchby" value="planet" id="planet" /><label for="planet">Planet</label><br />
+            <input type="radio" name="searchby" value="player" id="player" /><label for="player">Player</label><br />
+            <input type="radio" name="searchby" value="planet" id="planet" checked="checked" /><label for="planet">Planet</label><br />
         </div>
     </form>
     <p>{{ search_status }}</p>
     {% ifequal searchby "planet" %}
         <div id="sb_planet">
             <table border="1" cellspacing="0" cellpadding="1">
-                <caption>Present fleets on planet <strong>{{ location.name }}</strong></caption>
+                <caption>Present fleets on planet <strong>{{ location.name }}</strong> Stasis [<strong>{% ifequal location.stasis "0" %}DOWN{% else %}UP{% endifequal %}</strong>]</caption>
                 <tr>
                     <th>Owner</th>
                     <th>Defending</th>
