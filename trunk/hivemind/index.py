@@ -19,7 +19,8 @@ ALLOWED_USERS = ("sopo", "zeddie", "jester.8", "keffer", "gerbo")
 
 
 class HAPIlogin(webapp.RequestHandler):
-    """HAPI login handler
+    """
+    HAPI login handler
     """
     def get(self):
         path = os.path.join(os.path.dirname(__file__), 'hapilogin.html')
@@ -53,7 +54,8 @@ class HAPIlogin(webapp.RequestHandler):
 
 
 class Update(webapp.RequestHandler):
-    """Update handler
+    """
+    Update handler
     """
     def get(self):
         memcache.incr("chunk_counter")
@@ -61,6 +63,8 @@ class Update(webapp.RequestHandler):
 
     def post(self):
         chunk_counter = memcache.get("chunk_counter")
+
+# Fetch data only the first time
         if chunk_counter == 0:
             tmp_resp = urlfetch.fetch('&'.join([
                 memcache.get("hapi_req_url"),
@@ -104,7 +108,8 @@ class Update(webapp.RequestHandler):
 
 
 class Search(webapp.RequestHandler):
-    """Search handler
+    """
+    Search handler
     """
     def post(self):
         searchby = self.request.get('searchby')
@@ -112,6 +117,7 @@ class Search(webapp.RequestHandler):
         res_fleets = []
         res_planets = []
 
+# Search by player
         if searchby == 'player':
             tmp_fleet = []
             tmp_planet = ''
@@ -120,45 +126,41 @@ class Search(webapp.RequestHandler):
                 "ORDER BY location_name",
                 searched_term
             )
-            for fleet in query:
-                if fleet.location_name == tmp_planet or tmp_planet == '':
-                    tmp_fleet.append(fleet)
-                else:
-                    res_planets.append(tmp_fleet)
-                    tmp_fleet = []
-                    tmp_fleet.append(fleet)
-                tmp_planet = fleet.location_name
-            res_planets.append(tmp_fleet)
-            template_values = {
-                'searchby': searchby,
-                'player': res_planets[0][0].owner.name,
-                'res_planets': res_planets
-            }
+            if query.get():
+                for fleet in query:
+                    if fleet.location_name == tmp_planet or tmp_planet == '':
+                        tmp_fleet.append(fleet)
+                    else:
+                        res_planets.append(tmp_fleet)
+                        tmp_fleet = []
+                        tmp_fleet.append(fleet)
+                    tmp_planet = fleet.location_name
+                res_planets.append(tmp_fleet)
+                template_values = {
+                    'searchby': searchby,
+                    'player': res_planets[0][0].owner.name,
+                    'res_planets': res_planets
+                }
+            else:
+                template_values = {'search_status': "Player not found"}
 
+# Search by planet
         elif searchby == 'planet':
             query = Fleet.gql(
                 "WHERE location_name = :1 "
                 "ORDER BY owner_name",
                 searched_term
             )
-            for result in query:
-                res_fleets.append(result)
-            if res_fleets:
+            if query.get():
+                for fleet in query:
+                    res_fleets.append(fleet)
                 template_values = {
                     'searchby': searchby,
                     'location': res_fleets[0].location,
                     'res_fleets': res_fleets
                 }
             else:
-                template_values = {
-                    'search_status': "Planet not found"
-                }
-#        template_values = {
-##            'searched_term': searched_term,
-#            'searchby': searchby,
-#            'res_location': res_location,
-#            'results': res_fleets
-#        }
+                template_values = {'search_status': "Planet not found"}
         path = os.path.join(os.path.dirname(__file__), 'index.html')
         self.response.out.write(template.render(path, template_values))
 
