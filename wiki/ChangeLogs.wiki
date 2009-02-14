@@ -6,4 +6,4 @@
  * (01.18.09)
   * Added mass bombing information.
  * (02.14.09)
-  * HiveMind service (beta)
+  * Hivemind service (beta)
