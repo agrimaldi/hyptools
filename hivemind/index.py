@@ -3,8 +3,8 @@
 
 import os
 import cgi
+#import urllib2
 from google.appengine.api import urlfetch
-from google.appengine.api.urlfetch import DownloadError
 from google.appengine.api import memcache
 from google.appengine.ext import db
 from google.appengine.ext import webapp
@@ -19,6 +19,8 @@ ALLOWED_USERS = ("sopo", "zeddie", "jester.8", "keffer", "gerbo")
 
 
 class HAPIlogin(webapp.RequestHandler):
+    """HAPI login handler
+    """
     def get(self):
         path = os.path.join(os.path.dirname(__file__), 'hapilogin.html')
         self.response.out.write(template.render(path, {}))
@@ -43,7 +45,7 @@ class HAPIlogin(webapp.RequestHandler):
                         time=900
                     )
                 path = os.path.join(os.path.dirname(__file__), 'index.html')
-            except DownloadError:
+            except urllib2.URLError:
                 path = os.path.join(os.path.dirname(__file__), 'auth_fail.html')
         else:
             path = os.path.join(os.path.dirname(__file__), 'access_denied.html')
@@ -51,6 +53,8 @@ class HAPIlogin(webapp.RequestHandler):
 
 
 class Update(webapp.RequestHandler):
+    """Update handler
+    """
     def get(self):
         memcache.incr("chunk_counter")
         self.post()
@@ -66,24 +70,24 @@ class Update(webapp.RequestHandler):
             memcache.add(
                 key="response",
                 value=tmp_resp,
-                time=60
+                time=120
             )
         response = memcache.get("response")
         if response.status_code == 200:
             if chunk_counter == 0:
                 database = Updater(response.content)
-                database.chop(chunk_size=800)
+                database.chop(chunk_size=400)
                 memcache.set(
                     key="database",
                     value=database,
-                    time=60
+                    time=120
                 )
             database = memcache.get("database")
             database.update(database.chunk_list[chunk_counter])
             memcache.set(
                 key="database",
                 value=database,
-                time=60
+                time=120
             )
             if chunk_counter < len(database.chunk_list)-1:
                 self.redirect("/hivemind/update")
@@ -100,29 +104,34 @@ class Update(webapp.RequestHandler):
 
 
 class Search(webapp.RequestHandler):
+    """Search handler
+    """
     def post(self):
         searchby = self.request.get('searchby')
-        searched_term = cgi.escape(self.request.get('searched_term')).lower()
+        searched_term = cgi.escape(self.request.get('searched_term')).lower().strip()
         res_fleets = []
-        res_players = []
         res_planets = []
 
         if searchby == 'player':
+            tmp_fleet = []
+            tmp_planet = ''
             query = Fleet.gql(
                 "WHERE owner_name = :1 "
                 "ORDER BY location_name",
                 searched_term
             )
-            for result in query:
-                if result.location not in res_planets:
-                    res_planets.append(result.location)
-                    print res_planets
-                    print result
-                    print result.location.name
-                    print
-#                res_fleets.append(result)
+            for fleet in query:
+                if fleet.location_name == tmp_planet or tmp_planet == '':
+                    tmp_fleet.append(fleet)
+                else:
+                    res_planets.append(tmp_fleet)
+                    tmp_fleet = []
+                    tmp_fleet.append(fleet)
+                tmp_planet = fleet.location_name
+            res_planets.append(tmp_fleet)
             template_values = {
                 'searchby': searchby,
+                'player': res_planets[0][0].owner.name,
                 'res_planets': res_planets
             }
 
@@ -161,7 +170,7 @@ application = webapp.WSGIApplication([
     debug=True)
 
 def main():
-    memcache.add(key="chunk_counter", value=0, time=60)
+    memcache.add(key="chunk_counter", value=0, time=120)
     run_wsgi_app(application)
 
 if __name__ == "__main__":
