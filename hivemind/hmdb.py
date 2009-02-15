@@ -5,24 +5,43 @@ from google.appengine.ext import db
 
 
 class Planet(db.Model):
+    """Planet model.
+    Contains information about a planet :
+        - The name of the planet
+        - Whether stasis is up or down
+        - The date at which the planet was last modified
+    """
     name = db.StringProperty(required=True)
     stasis = db.StringProperty()
     date = db.DateTimeProperty()
 
-    def get_fleets(self):
+    @property
+    def lfleets(self):
         lfleets = []
         for fleet in  self.fleets:
             lfleets.append(fleet)
         return lfleets
 
-    lfleets = property(get_fleets)
-
 
 class Player(db.Model):
+    """Player model.
+    Contains information about a player :
+        - The name of the player
+    """
     name = db.StringProperty(required=True)
 
 
 class Fleet(db.Model):
+    """Fleet model.
+    Contains information about a fleet.
+        - The race
+        - The mode (defending or attacking)
+        - Whether it is camouflaged or not
+        - Whether mass bombing is enabled
+        - It's composition (scouts, destroyers, cruisers, bombers, armies)
+        - The owner of the fleet
+        - The planet it is on
+    """
     frace = db.StringProperty()
     defend = db.StringProperty()
     camouf = db.StringProperty()
@@ -48,22 +67,27 @@ class Fleet(db.Model):
         self.bombing = status
 
     def set_scou(self, value):
-        self.scou = value
+        self.scou = (value == '0' and '-' or value)
 
     def set_crui(self, value):
-        self.crui = value
+        self.crui = (value == '0' and '-' or value)
 
     def set_bomb(self, value):
-        self.bomb = value
+        self.bomb = (value == '0' and '-' or value)
 
     def set_dest(self, value):
-        self.dest = value
+        self.dest = (value == '0' and '-' or value)
 
     def set_carmies(self, value):
-        self.carmies = value
+        self.carmies = (value == '0' and '-' or value)
 
     def set_garmies(self, value):
-        self.garmies = value
+        self.garmies = (value == '0' and '-' or value)
 
     def set_frace(self, value):
-        self.frace = value
+        if value == '0':
+            self.frace = 'Human'
+        elif value == '1':
+            self.frace = 'Azterk'
+        else:
+            self.frace = 'Xillor'

@@ -10,13 +10,13 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-# Used 12 times in query history.
+# Used 117 times in query history.
 - kind: Fleet
   properties:
   - name: location_name
   - name: owner_name
 
-# Used 35 times in query history.
+# Used 68 times in query history.
 - kind: Fleet
   properties:
   - name: owner_name

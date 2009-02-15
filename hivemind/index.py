@@ -15,12 +15,11 @@ from hivemind.hivemind import Updater
 
 
 HAPI_BASE_URL = 'http://www.hyperiums.com/servlet/HAPI'
-ALLOWED_USERS = ("sopo", "zeddie", "jester.8", "keffer", "gerbo")
+ALLOWED_USERS = ("sopo", "zeddie", "jester.8", "keffer", "gerbo", "slyons93", "om49")
 
 
 class HAPIlogin(webapp.RequestHandler):
-    """
-    HAPI login handler
+    """HAPI login handler
     """
     def get(self):
         path = os.path.join(os.path.dirname(__file__), 'hapilogin.html')
@@ -31,12 +30,10 @@ class HAPIlogin(webapp.RequestHandler):
         hapikey = cgi.escape(self.request.get('hapikey'))
         if login in ALLOWED_USERS:
             try:
-                response = urlfetch.fetch(''.join([
-                    HAPI_BASE_URL,
-                    '?game=Hyperiums5',
-                    '&player=', login,
-                    '&hapikey=', hapikey
-                ]))
+                response = urlfetch.fetch(''.join([HAPI_BASE_URL,
+                                                   '?game=Hyperiums5',
+                                                   '&player=', login,
+                                                   '&hapikey=', hapikey]))
                 if response.status_code == 200:
                     memcache.set(
                         key="hapi_req_url",
@@ -46,7 +43,7 @@ class HAPIlogin(webapp.RequestHandler):
                         time=900
                     )
                 path = os.path.join(os.path.dirname(__file__), 'index.html')
-            except urllib2.URLError:
+            except urlfetch.DownloadError:
                 path = os.path.join(os.path.dirname(__file__), 'auth_fail.html')
         else:
             path = os.path.join(os.path.dirname(__file__), 'access_denied.html')
@@ -54,45 +51,40 @@ class HAPIlogin(webapp.RequestHandler):
 
 
 class Update(webapp.RequestHandler):
-    """
-    Update handler
+    """Update handler
     """
     def get(self):
+        """Only purpose of this method is to call the <post> method in case
+        of a redirection
+        """
         memcache.incr("chunk_counter")
         self.post()
 
     def post(self):
         chunk_counter = memcache.get("chunk_counter")
 
-# Fetch data only the first time
+        # Fetch data only the first time
         if chunk_counter == 0:
-            tmp_resp = urlfetch.fetch('&'.join([
-                memcache.get("hapi_req_url"),
-                'request=getfleetsinfo',
-                'planet=*',
-                'data=foreign_planets']))
-            memcache.add(
-                key="response",
-                value=tmp_resp,
-                time=120
-            )
+            tmp_resp = urlfetch.fetch('&'.join([memcache.get("hapi_req_url"),
+                                                'request=getfleetsinfo',
+                                                'planet=*',
+                                                'data=foreign_planets']))
+            memcache.add("response", tmp_resp, 120)
+
         response = memcache.get("response")
         if response.status_code == 200:
+
+            # If first iteration, create an Updater object and chop the data
             if chunk_counter == 0:
                 database = Updater(response.content)
-                database.chop(chunk_size=400)
-                memcache.set(
-                    key="database",
-                    value=database,
-                    time=120
-                )
+                database.chop(3000)
+                memcache.set("database", database, 120)
+
+            # Update the database with the current chunk
             database = memcache.get("database")
             database.update(database.chunk_list[chunk_counter])
-            memcache.set(
-                key="database",
-                value=database,
-                time=120
-            )
+            memcache.set("database", database, 120)
+
             if chunk_counter < len(database.chunk_list)-1:
                 self.redirect("/hivemind/update")
             else:
@@ -100,16 +92,15 @@ class Update(webapp.RequestHandler):
             update_status = 'Database successfully updated'
         else:
             update_status = 'Error while updating database'
-        template_values = {
-            'update_status': update_status
-        }
+
+        template_values = {'update_status': update_status}
         path = os.path.join(os.path.dirname(__file__), 'index.html')
         self.response.out.write(template.render(path, template_values))
 
 
 class Search(webapp.RequestHandler):
-    """
-    Search handler
+    """Search handler
+    Handles searching by planet name or by player name through a POST method.
     """
     def post(self):
         searchby = self.request.get('searchby')
@@ -117,15 +108,13 @@ class Search(webapp.RequestHandler):
         res_fleets = []
         res_planets = []
 
-# Search by player
+        # Search by player
         if searchby == 'player':
             tmp_fleet = []
             tmp_planet = ''
-            query = Fleet.gql(
-                "WHERE owner_name = :1 "
-                "ORDER BY location_name",
-                searched_term
-            )
+            query = Fleet.gql("WHERE owner_name = :1 "
+                              "ORDER BY location_name",
+                              searched_term)
             if query.get():
                 for fleet in query:
                     if fleet.location_name == tmp_planet or tmp_planet == '':
@@ -142,15 +131,13 @@ class Search(webapp.RequestHandler):
                     'res_planets': res_planets
                 }
             else:
-                template_values = {'search_status': "Player not found"}
+                template_values = {'search_status': "<p>Player not found</p>"}
 
-# Search by planet
+        # Search by planet
         elif searchby == 'planet':
-            query = Fleet.gql(
-                "WHERE location_name = :1 "
-                "ORDER BY owner_name",
-                searched_term
-            )
+            query = Fleet.gql("WHERE location_name = :1 "
+                              "ORDER BY owner_name",
+                              searched_term)
             if query.get():
                 for fleet in query:
                     res_fleets.append(fleet)
@@ -160,16 +147,15 @@ class Search(webapp.RequestHandler):
                     'res_fleets': res_fleets
                 }
             else:
-                template_values = {'search_status': "Planet not found"}
+                template_values = {'search_status': "<p>Planet not found</p>"}
         path = os.path.join(os.path.dirname(__file__), 'index.html')
         self.response.out.write(template.render(path, template_values))
 
 
-application = webapp.WSGIApplication([
-    ('/hivemind', HAPIlogin),
-    ('/hivemind/update', Update),
-    ('/hivemind/search', Search)],
-    debug=True)
+application = webapp.WSGIApplication([('/hivemind', HAPIlogin),
+                                      ('/hivemind/update', Update),
+                                      ('/hivemind/search', Search)],
+                                     debug=True)
 
 def main():
     memcache.add(key="chunk_counter", value=0, time=120)
