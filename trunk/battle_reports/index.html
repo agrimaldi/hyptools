@@ -4,26 +4,25 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/main.css" />
     <title> .:: Battle reports analyser ::. </title>
 </head>
 <body>
-    <h2> .:: Battle reports analyser ::. </h2>
-    <form action="/battle_reports" method="post">
-        <div>
-            <label for="content">
-                Copy one or more battle reports in the following field.<br />
-                You can copy/past the whole reports page from hyperiums.<br />
-                Press [Analyse] to process your data and analyse your battle
-                report(s).
-            </label>
-            <br />
-            <textarea name="content" id="content" rows="25" cols="50"></textarea>
-            <br />
-        </div>
-        <div>
-            <input type="submit" value="Analyse"/>
-            <input type="reset" value="Clear"/>
-        </div>
-    </form>
+    <h3> .:: Battle reports analyser ::. </h3>
+    <div id="left">
+        <form action="/battle_reports" method="post">
+            <p>
+                <label for="content">
+                    Copy one or more battle reports in the following field.<br />
+                    You can copy/past the whole reports page.<br />
+                    Press [Analyse] to process your data and analyse your battle
+                    report(s).<br /><br />
+                </label>
+                <textarea name="content" id="content" class="textfield-medium" rows="20" cols="60"></textarea><br />
+                <input type="submit" value="Analyse" class="button"/>
+                <input type="reset" value="Clear" class="button"/>
+            </p>
+        </form>
+    </div>
 </body>
 </html>

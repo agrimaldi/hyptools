@@ -4,103 +4,98 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/main.css" />
     <title> .:: Scout Screen Synchronizer ::. </title>
 </head>
 <body>
-    <h2> .:: Scout Screen Synchronizer ::. </h2>
-    <form method="post" action="/hivemind/update">
-        <div id="submit_update">
-            {{ update_status }}
-            <p><input type="submit" name="update" value="Update" /></p>
-        </div>
-    </form>
-    <form method="post" action="/hivemind/search">
-        <div id="submit_search">
-            <input type="text" name="searched_term" value="" id="searched_term" />
-            <input type="submit" name="search" value="Search" /><br />
-            <input type="radio" name="searchby" value="player" id="player" /><label for="player">Player</label><br />
-            <input type="radio" name="searchby" value="planet" id="planet" checked="checked" /><label for="planet">Planet</label><br />
-        </div>
-    </form>
-    <p>{{ search_status }}</p>
-    {% ifequal searchby "planet" %}
-        <div id="sb_planet">
-            <table border="1" cellspacing="0" cellpadding="1">
-                <caption>Present fleets on planet <strong>{{ location.name }}</strong> Stasis [<strong>{% ifequal location.stasis "0" %}DOWN{% else %}UP{% endifequal %}</strong>]</caption>
-                <tr>
-                    <th>Owner</th>
-                    <th>Defending</th>
-                    <th>Race</th>
-                    <th>Cruisers</th>
-                    <th>Destroyers</th>
-                    <th>Bombers</th>
-                    <th>Scouts</th>
-                    <th>CAs</th>
-                    <th>GAs</th>
-                </tr>
-                {% for fleet in res_fleets %}
-                    <tr>
-                        <td>{{ fleet.owner.name }}</td>
-                        <td>{{ fleet.defend }}</td>
-                        {% ifequal fleet.frace "0" %}
-                            <td>Human</td>
-                        {% endifequal %}
-                        {% ifequal fleet.frace "1" %}
-                            <td>Azterk</td>
-                        {% endifequal %}
-                        {% ifequal fleet.frace "2" %}
-                            <td>Xillor</td>
-                        {% endifequal %}
-                        <td>{{ fleet.crui }}</td>
-                        <td>{{ fleet.dest }}</td>
-                        <td>{{ fleet.bomb }}</td>
-                        <td>{{ fleet.scou }}</td>
-                        <td>{{ fleet.carmies }}</td>
-                        <td>{{ fleet.garmies }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-            <p>Last update : <strong>{{ location.date.date }}</strong> at <strong>{{ location.date.hour }}:{{ location.date.minute }}</strong> ST</p>
-        </div>
-    {% endifequal %}
-    {% ifequal searchby "player" %}
-        <div id="sb_player">
-            {% for planet in res_planets %}
-                <table border="1" cellspacing="0" cellpadding="1">
-                    <caption>Fleets owned by player <strong>{{ player }}</strong> on planet <strong>{{ planet.0.location.name }}</strong></caption>
-                    <tr>
-                        <th>Defending</th>
-                        <th>Race</th>
-                        <th>Cruisers</th>
-                        <th>Destroyers</th>
-                        <th>Bombers</th>
-                        <th>Scouts</th>
-                        <th>CAs</th>
-                        <th>GAs</th>
-                    </tr>
-                    {% for fleet in planet %}
+    <h3> .:: Scout Screen Synchronizer ::. </h3>
+    <div id="left">
+        <fieldset>
+            <legend>Update Database</legend>
+            <form method="post" action="/hivemind/update">
+                <p><input type="submit" name="update" value="Update" id="update-button" class="button" />{{ update_status }}</p>
+            </form>
+        </fieldset>
+        <fieldset>
+            <legend>Search</legend>
+            <form method="post" action="/hivemind/search">
+                <p>
+                    <input type="radio" name="searchby" value="player" id="player" checked="checked" /><label for="player" class="radio">Player</label><br />
+                    <input type="radio" name="searchby" value="planet" id="planet" /><label for="planet" class="radio">Planet</label>
+                    <input type="text" name="searched_term" value="" class="textfield-medium" />
+                    <input type="submit" name="search" value="Search" class="button" />
+                </p>
+            </form>
+        </fieldset>
+        {{ search_status }}
+    </div>
+    <div id="right">
+        <fieldset class="result">
+        <legend>Results</legend>
+            {% ifequal searchby "planet" %}
+                <fieldset>
+                    <legend>Present fleets on planet <strong>{{ location.name }}</strong> Stasis [<strong>{% ifequal location.stasis "0" %}DOWN{% else %}UP{% endifequal %}</strong>]</legend>
+                    <table cellspacing="3" cellpadding="0" class="content-table">
                         <tr>
-                            <td>{{ fleet.defend }}</td>
-                            {% ifequal fleet.frace "0" %}
-                                <td>Human</td>
-                            {% endifequal %}
-                            {% ifequal fleet.frace "1" %}
-                                <td>Azterk</td>
-                            {% endifequal %}
-                            {% ifequal fleet.frace "2" %}
-                                <td>Xillor</td>
-                            {% endifequal %}
-                            <td>{{ fleet.crui }}</td>
-                            <td>{{ fleet.dest }}</td>
-                            <td>{{ fleet.bomb }}</td>
-                            <td>{{ fleet.scou }}</td>
-                            <td>{{ fleet.carmies }}</td>
-                            <td>{{ fleet.garmies }}</td>
+                            <th>Owner</th>
+                            <th>Defending</th>
+                            <th>Race</th>
+                            <th>Cruisers</th>
+                            <th>Destroyers</th>
+                            <th>Bombers</th>
+                            <th>Scouts</th>
+                            <th>CAs</th>
+                            <th>GAs</th>
                         </tr>
-                    {% endfor %}
-                </table><br />
-            {% endfor %}
-        </div>
-    {% endifequal %}
+                        {% for fleet in res_fleets %}
+                            <tr>
+                                <td class="result-cell">{{ fleet.owner.name }}</td>
+                                <td class="result-cell">{{ fleet.defend }}</td>
+                                <td class="result-cell">{{ fleet.frace }}</td>
+                                <td class="result-cell">{{ fleet.crui }}</td>
+                                <td class="result-cell">{{ fleet.dest }}</td>
+                                <td class="result-cell">{{ fleet.bomb }}</td>
+                                <td class="result-cell">{{ fleet.scou }}</td>
+                                <td class="result-cell">{{ fleet.carmies }}</td>
+                                <td class="result-cell">{{ fleet.garmies }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </fieldset>
+                <p>Last update : <strong>{{ location.date.date }}</strong> at <strong>{{ location.date.hour }}:{{ location.date.minute }}</strong> ST</p>
+            {% endifequal %}
+            {% ifequal searchby "player" %}
+                {% for planet in res_planets %}
+                    <fieldset>
+                        <legend>Fleets owned by player <strong>{{ player }}</strong> on planet <strong>{{ planet.0.location.name }}</strong></legend>
+                        <table cellspacing="3" cellpadding="0" class="content-table">
+                            <tr>
+                                <th>Defending</th>
+                                <th>Race</th>
+                                <th>Cruisers</th>
+                                <th>Destroyers</th>
+                                <th>Bombers</th>
+                                <th>Scouts</th>
+                                <th>CAs</th>
+                                <th>GAs</th>
+                            </tr>
+                            {% for fleet in planet %}
+                                <tr>
+                                    <td class="result-cell">{{ fleet.defend }}</td>
+                                    <td class="result-cell">{{ fleet.frace }}</td>
+                                    <td class="result-cell">{{ fleet.crui }}</td>
+                                    <td class="result-cell">{{ fleet.dest }}</td>
+                                    <td class="result-cell">{{ fleet.bomb }}</td>
+                                    <td class="result-cell">{{ fleet.scou }}</td>
+                                    <td class="result-cell">{{ fleet.carmies }}</td>
+                                    <td class="result-cell">{{ fleet.garmies }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table><br />
+                    </fieldset>
+                {% endfor %}
+            {% endifequal %}
+        </fieldset>
+    </div>
 </body>
 </html>

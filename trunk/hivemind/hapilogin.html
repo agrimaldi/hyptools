@@ -4,12 +4,14 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/main.css" />
     <title> .:: Scout Screen Synchronizer [HAPI Authentication] ::. </title>
 </head>
 <body>
-    <h2>.:: [HAPI Authentication] ::. </h2>
+    <h3>[ Authentication ]</h3>
     <form method="post" action="/hivemind">
-        <table border="0" cellspacing="2" cellpadding="2" class="content-table" width="600">
+        <p><br /><br /></p>
+        <table cellspacing="2" cellpadding="2" class="content-table" width="400">
 	        <tr>
 		        <td class="content-form">Login:</td>
 		        <td class="content-form"><input type="text" name="login" class="textfield-medium" maxlength="16"/></td>
@@ -19,10 +21,9 @@
 		        <td class="content-form"><input type="text" name="hapikey" class="textfield-medium" maxlength="32" /></td>
 	        </tr>
 	        <tr>
-  		        <td colspan="2" class="content-form">
-   			        <input type="submit" name="submit" value="Enter" />
-  		        </td>
- 	        </tr>
+	            <td></td>
+	            <td id="login-button"><input type="submit" name="submit" value="Login" class="button"/></td>
+	        </tr>
         </table>
     </form>
 </body>
