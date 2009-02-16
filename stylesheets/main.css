@@ -138,6 +138,11 @@ label.radio
     padding-top: 20px;
 }
 
+#logout-button
+{
+    margin-right: 25px;
+}
+
 #update-button
 {
     margin-right: 15px;

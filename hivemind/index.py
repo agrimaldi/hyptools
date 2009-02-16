@@ -15,7 +15,14 @@ from hivemind.hivemind import Updater
 
 
 HAPI_BASE_URL = 'http://www.hyperiums.com/servlet/HAPI'
-ALLOWED_USERS = ("sopo", "zeddie", "jester.8", "keffer", "gerbo", "slyons93", "om49")
+ALLOWED_USERS = ("sopo",
+                 "zeddie",
+                 "jester.8",
+                 "keffer",
+                 "gerbo",
+                 "slyons93",
+                 "om49",
+                 "hactar")
 
 
 class HAPIlogin(webapp.RequestHandler):
@@ -50,6 +57,16 @@ class HAPIlogin(webapp.RequestHandler):
         self.response.out.write(template.render(path, {}))
 
 
+class HAPIlogout(webapp.RequestHandler):
+    """HAPI logout handler
+    """
+    def post(self):
+        response = urlfetch.fetch('&'.join([memcache.get("hapi_req_url"),
+                                            'request=logout']))
+        if response.status_code == 200 and response.content == 'status=ok':
+            self.redirect('/hivemind')
+
+
 class Update(webapp.RequestHandler):
     """Update handler
     """
@@ -77,7 +94,7 @@ class Update(webapp.RequestHandler):
             # If first iteration, create an Updater object and chop the data
             if chunk_counter == 0:
                 database = Updater(response.content)
-                database.chop(3000)
+                database.chop(1500)
                 memcache.set("database", database, 120)
 
             # Update the database with the current chunk
@@ -153,6 +170,7 @@ class Search(webapp.RequestHandler):
 
 
 application = webapp.WSGIApplication([('/hivemind', HAPIlogin),
+                                      ('/hivemind/logout', HAPIlogout),
                                       ('/hivemind/update', Update),
                                       ('/hivemind/search', Search)],
                                      debug=True)
