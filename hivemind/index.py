@@ -63,6 +63,10 @@ class HAPIlogout(webapp.RequestHandler):
     def post(self):
         response = urlfetch.fetch('&'.join([memcache.get("hapi_req_url"),
                                             'request=logout']))
+        memcache.delete_multi(["chunk_counter",
+                               "response",
+                               "hapi_req_url",
+                               "database"])
         if response.status_code == 200 and response.content == 'status=ok':
             self.redirect('/hivemind')
 
