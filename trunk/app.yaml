@@ -1,5 +1,5 @@
 application: hyptools
-version: 3
+version: 4
 runtime: python
 api_version: 1
 
@@ -16,7 +16,7 @@ handlers:
 - url: /(battle_reports|present_fleets|hivemind)
   script: \1/index.py
 
-- url: /hivemind/(update|search|login)
+- url: /hivemind/(update|search|login|logout)
   script: /hivemind/index.py
 
 - url: /.*
