@@ -22,7 +22,8 @@ ALLOWED_USERS = ("sopo",
                  "gerbo",
                  "slyons93",
                  "om49",
-                 "hactar")
+                 "hactar",
+                 "laharl")
 
 
 class HAPIlogin(webapp.RequestHandler):
@@ -90,7 +91,7 @@ class Update(webapp.RequestHandler):
                                                 'request=getfleetsinfo',
                                                 'planet=*',
                                                 'data=foreign_planets']))
-            memcache.add("response", tmp_resp, 120)
+            memcache.add("response", tmp_resp, 220)
 
         response = memcache.get("response")
         if response.status_code == 200:
@@ -98,21 +99,21 @@ class Update(webapp.RequestHandler):
             # If first iteration, create an Updater object and chop the data
             if chunk_counter == 0:
                 database = Updater(response.content)
-                database.chop(1500)
-                memcache.set("database", database, 120)
+                database.chop(1000)
+                memcache.set("database", database, 220)
 
             # Update the database with the current chunk
             database = memcache.get("database")
             database.update(database.chunk_list[chunk_counter])
-            memcache.set("database", database, 120)
+            memcache.set("database", database, 220)
 
             if chunk_counter < len(database.chunk_list)-1:
                 self.redirect("/hivemind/update")
             else:
                 memcache.delete(key="chunk_counter")
-            update_status = 'Database successfully updated'
+            update_status = '<span class="text-success">Database successfully updated</span>'
         else:
-            update_status = 'Error while updating database'
+            update_status = '<span class="text-error">Error while updating database</span>'
 
         template_values = {'update_status': update_status}
         path = os.path.join(os.path.dirname(__file__), 'index.html')
@@ -152,7 +153,7 @@ class Search(webapp.RequestHandler):
                     'res_planets': res_planets
                 }
             else:
-                template_values = {'search_status': "<p>Player not found</p>"}
+                template_values = {'search_status': '<p class="text-error">Player not found</p>'}
 
         # Search by planet
         elif searchby == 'planet':
@@ -168,7 +169,7 @@ class Search(webapp.RequestHandler):
                     'res_fleets': res_fleets
                 }
             else:
-                template_values = {'search_status': "<p>Planet not found</p>"}
+                template_values = {'search_status': '<p class="text-error">Planet not found</p>'}
         path = os.path.join(os.path.dirname(__file__), 'index.html')
         self.response.out.write(template.render(path, template_values))
 
@@ -180,7 +181,7 @@ application = webapp.WSGIApplication([('/hivemind', HAPIlogin),
                                      debug=True)
 
 def main():
-    memcache.add(key="chunk_counter", value=0, time=120)
+    memcache.add(key="chunk_counter", value=0, time=220)
     run_wsgi_app(application)
 
 if __name__ == "__main__":

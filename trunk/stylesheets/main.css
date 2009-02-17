@@ -28,7 +28,7 @@ fieldset
     padding-left: 20px;
     padding-bottom: 10px;
     width: 350px;
-    border: 1px solid;
+    border: 1px solid #454545;
 }
 
 fieldset.result
@@ -67,6 +67,21 @@ a:visited
     text-decoration: none;
 }
 
+.text-standard
+{
+    color: #545454;
+}
+
+.text-success
+{
+    color: #518b49;
+}
+
+.text-error
+{
+    color: #A84747;
+}
+
 .button
 {
     color: #AAAA77;
@@ -99,11 +114,17 @@ a:visited
     color: #AAAA77;
 }
 
-.result-cell
+.table-cell
 {
     text-align: center;
     padding: 1px;
     color: #AAAA77;
+}
+
+.table-header
+{
+    text-align: center;
+    color: #545454;
 }
 
 .textfield-medium
@@ -145,5 +166,5 @@ label.radio
 
 #update-button
 {
-    margin-right: 15px;
+    margin-right: 20px;
 }
