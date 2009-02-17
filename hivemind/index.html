@@ -30,44 +30,45 @@
         <fieldset>
             <legend>Logout</legend>
             <form action="/hivemind/logout" method="post">
-                <p><input type="submit" name="logout" value="Logout" id="logout-button" class="button" />[ Logout from Hyperiums ]</p>
+                <p><input type="submit" name="logout" value="Logout" id="logout-button" class="button" /><span class="text-standard">[ Logout from Hyperiums ]</span></p>
             </form>
-        {{ search_status }}
+        </fieldset>
     </div>
     <div id="right">
         <fieldset class="result">
-        <legend>Results</legend>
+            <legend>Results</legend>
+            {{ search_status }}
             {% ifequal searchby "planet" %}
                 <fieldset>
                     <legend>Present fleets on planet <strong>{{ location.name }}</strong> Stasis [<strong>{% ifequal location.stasis "0" %}DOWN{% else %}UP{% endifequal %}</strong>]</legend>
                     <table cellspacing="3" cellpadding="0" class="content-table">
                         <tr>
-                            <th>Owner</th>
-                            <th>Defending</th>
-                            <th>Race</th>
-                            <th>Cruisers</th>
-                            <th>Destroyers</th>
-                            <th>Bombers</th>
-                            <th>Scouts</th>
-                            <th>CAs</th>
-                            <th>GAs</th>
+                            <th class="table-header">Owner</th>
+                            <th class="table-header">Defending</th>
+                            <th class="table-header">Race</th>
+                            <th class="table-header">Cruisers</th>
+                            <th class="table-header">Destroyers</th>
+                            <th class="table-header">Bombers</th>
+                            <th class="table-header">Scouts</th>
+                            <th class="table-header">CAs</th>
+                            <th class="table-header">GAs</th>
                         </tr>
                         {% for fleet in res_fleets %}
                             <tr>
-                                <td class="result-cell">{{ fleet.owner.name }}</td>
-                                <td class="result-cell">{{ fleet.defend }}</td>
-                                <td class="result-cell">{{ fleet.frace }}</td>
-                                <td class="result-cell">{{ fleet.crui }}</td>
-                                <td class="result-cell">{{ fleet.dest }}</td>
-                                <td class="result-cell">{{ fleet.bomb }}</td>
-                                <td class="result-cell">{{ fleet.scou }}</td>
-                                <td class="result-cell">{{ fleet.carmies }}</td>
-                                <td class="result-cell">{{ fleet.garmies }}</td>
+                                <td class="table-cell">{{ fleet.owner.name }}</td>
+                                <td class="table-cell">{{ fleet.defend }}</td>
+                                <td class="table-cell">{{ fleet.frace }}</td>
+                                <td class="table-cell">{{ fleet.crui }}</td>
+                                <td class="table-cell">{{ fleet.dest }}</td>
+                                <td class="table-cell">{{ fleet.bomb }}</td>
+                                <td class="table-cell">{{ fleet.scou }}</td>
+                                <td class="table-cell">{{ fleet.carmies }}</td>
+                                <td class="table-cell">{{ fleet.garmies }}</td>
                             </tr>
                         {% endfor %}
                     </table>
                 </fieldset>
-                <p>Last update : <strong>{{ location.date.date }}</strong> at <strong>{{ location.date.hour }}:{{ location.date.minute }}</strong> ST</p>
+                <p class="text-standard">Last update : <strong>{{ location.date.date }}</strong> at <strong>{{ location.date.hour }}:{{ location.date.minute }}</strong> ST</p>
             {% endifequal %}
             {% ifequal searchby "player" %}
                 {% for planet in res_planets %}
@@ -75,25 +76,25 @@
                         <legend>Fleets owned by player <strong>{{ player }}</strong> on planet <strong>{{ planet.0.location.name }}</strong></legend>
                         <table cellspacing="3" cellpadding="0" class="content-table">
                             <tr>
-                                <th>Defending</th>
-                                <th>Race</th>
-                                <th>Cruisers</th>
-                                <th>Destroyers</th>
-                                <th>Bombers</th>
-                                <th>Scouts</th>
-                                <th>CAs</th>
-                                <th>GAs</th>
+                                <th class="table-header">Defending</th>
+                                <th class="table-header">Race</th>
+                                <th class="table-header">Cruisers</th>
+                                <th class="table-header">Destroyers</th>
+                                <th class="table-header">Bombers</th>
+                                <th class="table-header">Scouts</th>
+                                <th class="table-header">CAs</th>
+                                <th class="table-header">GAs</th>
                             </tr>
                             {% for fleet in planet %}
                                 <tr>
-                                    <td class="result-cell">{{ fleet.defend }}</td>
-                                    <td class="result-cell">{{ fleet.frace }}</td>
-                                    <td class="result-cell">{{ fleet.crui }}</td>
-                                    <td class="result-cell">{{ fleet.dest }}</td>
-                                    <td class="result-cell">{{ fleet.bomb }}</td>
-                                    <td class="result-cell">{{ fleet.scou }}</td>
-                                    <td class="result-cell">{{ fleet.carmies }}</td>
-                                    <td class="result-cell">{{ fleet.garmies }}</td>
+                                    <td class="table-cell">{{ fleet.defend }}</td>
+                                    <td class="table-cell">{{ fleet.frace }}</td>
+                                    <td class="table-cell">{{ fleet.crui }}</td>
+                                    <td class="table-cell">{{ fleet.dest }}</td>
+                                    <td class="table-cell">{{ fleet.bomb }}</td>
+                                    <td class="table-cell">{{ fleet.scou }}</td>
+                                    <td class="table-cell">{{ fleet.carmies }}</td>
+                                    <td class="table-cell">{{ fleet.garmies }}</td>
                                 </tr>
                             {% endfor %}
                         </table><br />
